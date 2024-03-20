@@ -1,0 +1,58 @@
+# Setup
+mode:
+  train
+seed:
+  777
+save_path:
+  results/tmp
+distributed:
+  backend: 'gloo'
+  address: 'localhost'
+  port: '12345'
+
+# Data
+data_path:
+  C:/Users/heegyoon/Desktop/data
+datasets:
+  train:
+    mnist:
+      - train # provided sub-split
+  test:
+    mnist:
+      - test
+  val:
+
+batch_size:
+  256
+num_workers:
+  16
+
+# Architecture
+model:
+  ae
+input_dim:
+  784
+latent_dim:
+  2
+hidden_dims:
+  - 512
+  - 512
+  - 32
+
+# Train
+num_epochs:
+  30
+loss_functions:
+  mse:
+    weight: 1.0
+optimizer:
+  adam
+base_lr:
+  0.001
+weight_decay:
+  0
+adjust_lr:
+  False
+
+# Infer
+pretrained_model:
