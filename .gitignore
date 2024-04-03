@@ -1,6 +1,8 @@
 __pycache__
 .vscode
 kr_models
+download
+preprocessing
 
 *.pth
 *.onnx
