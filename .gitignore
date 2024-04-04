@@ -1,11 +1,12 @@
 __pycache__
 .vscode
 kr_models
-download
 preprocessing
 
+*.json
 *.pth
 *.onnx
+*.txt
 
 demo_sample_data.py
 log.txt
