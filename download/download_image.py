@@ -1,4 +1,5 @@
 import os
+import argparse
 from tqdm import tqdm
 
 from google.oauth2.credentials import Credentials
@@ -55,20 +56,40 @@ def download_file(service, file_id, save_to):
     request = service.files().get_media(fileId=file_id)
     with open(save_to, 'wb') as fh:
         downloader = MediaIoBaseDownload(fh, request)
-    done = False
-    while done is False:
-        status, done = downloader.next_chunk()
+        done = False
+        while done is False:
+            status, done = downloader.next_chunk()
     return done
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--day', type=str, default='99999999')
+    return parser.parse_args()
+
+
+def get_person_exist(data_path):
+    person_exist = []
+    days = os.listdir(data_path)
+    days = [d for d in days if os.path.isdir(d)]
+    for day in days:
+        for person in os.listdir(os.path.join(data_path, day)):
+            person_exist.append(person)
+    return person_exist
+
+
 def main():
+    args = parse_args()
     debugging = False
     token_path = 'download/token.json'
     OAuth_key_path = 'download/client_secret.json'
-    data_path = 'C:/Users/heegyoon/Desktop/data/IAS/vn/raw/20240404'
-    person_exist = os.listdir(data_path)
-    log_path = 'download/log_download_image.txt'
+    data_path = 'C:/Users/heegyoon/Desktop/data/IAS/vn/raw'
+    current_path = os.path.join(data_path, args.day)
+    log_path = os.path.join(current_path, 'log.txt')
     log = []
+    
+    person_exist = get_person_exist(data_path)
+    os.mkdir(current_path)
     
     creds = authenticate(token_path, OAuth_key_path)
     service = build('drive', 'v3', credentials=creds)
@@ -87,7 +108,7 @@ def main():
             log.append(f'{person_name}, already exists.\n')
             continue
         
-        person_path = os.path.join(data_path, person_name)
+        person_path = os.path.join(current_path, person_name)
         os.mkdir(person_path)
         
         files = find_file_in_folder(service, person['id'])
