@@ -2,7 +2,6 @@ __pycache__
 .vscode
 preprocessing
 tmp
-detection
 
 *.json
 *.pth
