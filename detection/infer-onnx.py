@@ -11,6 +11,10 @@ from ultralytics.utils.plotting import Colors
 
 from typing import List, Union, Tuple, Optional
 
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+from utils import is_image_file
+
 
 def align_idcard(img: np.ndarray, keypoints: np.ndarray, cls: float, dsize_factor: int = None) -> np.ndarray:
     if cls == 0:
@@ -108,7 +112,8 @@ class YOLOv8Seg:
         self.model_height, self.model_width = [x.shape for x in self.session.get_inputs()][0][-2:]
 
         # Load COCO class names
-        self.classes = yaml_load(check_yaml("yolov8/train-yolov8n-seg_vn.yaml"))["names"]
+        self.classes = yaml_load(check_yaml(
+            "C:/Users/heegyoon/projects/IAS-VN/detection/train-yolov8n-seg_vn.yaml"))["names"]
 
         # Create color palette
         self.color_palette = Colors()
@@ -398,7 +403,9 @@ class YOLOv8Seg:
 if __name__ == "__main__":
     # Create an argument parser to handle command-line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", type=str, required=True, help="Path to ONNX model")
+    # parser.add_argument("--model", type=str, required=True, help="Path to ONNX model")
+    parser.add_argument('--model',
+                        default='C:/Users/heegyoon/projects/IAS-VN/detection/train_2024_04_03_vn600_foreign200_e100/weights/best.onnx')
     parser.add_argument("--source", type=str, default=str(ASSETS / "bus.jpg"), help="Path to input image")
     parser.add_argument("--conf", type=float, default=0.25, help="Confidence threshold")
     parser.add_argument("--iou", type=float, default=0.45, help="NMS IoU threshold")
@@ -406,27 +413,74 @@ if __name__ == "__main__":
 
     # Build model
     model = YOLOv8Seg(args.model)
+    
+    num_total_img = 0
+    num_success = 0
+    data_path = 'C:/Users/heegyoon/Desktop/data/IAS/vn/raw'
+    days = os.listdir(data_path)
+    days.remove('desktop.ini')
+    
+    for day in days:
+        day_path = os.path.join(data_path, day)
+        person_dirs = os.listdir(day_path)
+        person_dirs.remove('log.txt')
+        for person in person_dirs:
+            person_path = os.path.join(day_path, person)
+            for img_file in os.listdir(person_path):
+                img_path = os.path.join(person_path, img_file)
+                if not is_image_file(img_path):
+                    continue
+                
+                num_total_img += 1
+                img = cv2.imread(img_path)
+                img_clone = img.copy()
+                
+                boxes, segments, masks = model(img, conf_threshold=args.conf, iou_threshold=args.iou)
+                
+                if len(boxes) > 0:
+                    #masks = np.array([cv2.resize(mask, shape) for mask in masks])
+                    keypoints = get_keypoints(masks)
+                    if keypoints is not None:
+                        num_success += 1
+                        aligned_img = align_idcard(img_clone, keypoints, boxes[0][5])
+                        aligned_img_path = os.path.join('aligned_images', f"align_{num_success}.jpg")
+                        cv2.imwrite(aligned_img_path, aligned_img)
+                        print('Save aligned image to "{}"'.format(aligned_img_path))
+                        
+                    #     # Draw idcard keypoints
+                    #     cv2.circle(img, keypoints[0], 2, (0, 0, 255), 3, cv2.LINE_AA)
+                    #     cv2.circle(img, keypoints[1], 2, (0, 0, 255), 3, cv2.LINE_AA)
+                    #     cv2.circle(img, keypoints[2], 2, (0, 0, 255), 3, cv2.LINE_AA)
+                    #     cv2.circle(img, keypoints[3], 2, (0, 0, 255), 3, cv2.LINE_AA)
 
-    # Read image by OpenCV
-    img = cv2.imread(args.source)
-    img_clone = img.copy()
-    # Inference
-    boxes, segments, masks = model(img, conf_threshold=args.conf, iou_threshold=args.iou)
+                    # model.draw_and_visualize(img, boxes, segments, vis=False, save=False)
+                    # else:
+                    #     model.draw_and_visualize(img, boxes, segments, vis=True, save=False)
+    
+    print(f'Num of total: {num_total_img}\nNum of success: {num_success}')
+                
+    
 
-    # Draw bboxes and polygons
-    if len(boxes) > 0:
-        #masks = np.array([cv2.resize(mask, shape) for mask in masks])
-        keypoints = get_keypoints(masks)
-        if keypoints is not None:
-            aligned_img = align_idcard(img_clone, keypoints, boxes[0][5])
-            aligned_img_path = os.path.join("align.jpg")
-            cv2.imwrite(aligned_img_path, aligned_img)
-            print('Save aligned image to "{}"'.format(aligned_img_path))
+    # # Read image by OpenCV
+    # img = cv2.imread(args.source)
+    # img_clone = img.copy()
+    # # Inference
+    # boxes, segments, masks = model(img, conf_threshold=args.conf, iou_threshold=args.iou)
+
+    # # Draw bboxes and polygons
+    # if len(boxes) > 0:
+    #     #masks = np.array([cv2.resize(mask, shape) for mask in masks])
+    #     keypoints = get_keypoints(masks)
+    #     if keypoints is not None:
+    #         aligned_img = align_idcard(img_clone, keypoints, boxes[0][5])
+    #         aligned_img_path = os.path.join("align.jpg")
+    #         cv2.imwrite(aligned_img_path, aligned_img)
+    #         print('Save aligned image to "{}"'.format(aligned_img_path))
             
-            # Draw idcard keypoints
-            cv2.circle(img, keypoints[0], 2, (0, 0, 255), 3, cv2.LINE_AA)
-            cv2.circle(img, keypoints[1], 2, (0, 0, 255), 3, cv2.LINE_AA)
-            cv2.circle(img, keypoints[2], 2, (0, 0, 255), 3, cv2.LINE_AA)
-            cv2.circle(img, keypoints[3], 2, (0, 0, 255), 3, cv2.LINE_AA)
+    #         # Draw idcard keypoints
+    #         cv2.circle(img, keypoints[0], 2, (0, 0, 255), 3, cv2.LINE_AA)
+    #         cv2.circle(img, keypoints[1], 2, (0, 0, 255), 3, cv2.LINE_AA)
+    #         cv2.circle(img, keypoints[2], 2, (0, 0, 255), 3, cv2.LINE_AA)
+    #         cv2.circle(img, keypoints[3], 2, (0, 0, 255), 3, cv2.LINE_AA)
 
-        model.draw_and_visualize(img, boxes, segments, vis=False, save=True)
+    #     model.draw_and_visualize(img, boxes, segments, vis=True, save=True)
