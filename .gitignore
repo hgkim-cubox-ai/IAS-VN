@@ -1,19 +1,17 @@
 __pycache__
 .vscode
-kr_models
 preprocessing
 tmp
+detection
 
 *.json
 *.pth
 *.onnx
 *.txt
-.jpg
-.JPG
-.jpeg
-.JPEG
-.png
-.PNG
-
-demo_sample_data.py
-log.txt
+*.jpg
+*.JPG
+*.jpeg
+*.JPEG
+*.png
+*.PNG
+*.bash
