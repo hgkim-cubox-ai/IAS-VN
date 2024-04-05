@@ -8,6 +8,12 @@ tmp
 *.pth
 *.onnx
 *.txt
+.jpg
+.JPG
+.jpeg
+.JPEG
+.png
+.PNG
 
 demo_sample_data.py
 log.txt
