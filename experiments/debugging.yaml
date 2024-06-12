@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/lr0.0005_th0.3
+  results/lr0.0005
 distributed:
   backend: gloo
   address: localhost
@@ -20,23 +20,11 @@ Data:
       - TNGo_new2
     test:
       - TNG_Employee
-    val:
-    
-  input:
-    image
-  type:
-    aligned
-  color:
-    rgb
   size:
     height:
       144
     width:
       224
-  n_patches:
-    8
-  patch_size:
-    64
   batch_size:
     32
   num_workers:
@@ -72,4 +60,4 @@ threshold:
 
 # Infer
 pretrained_model:
-  models/tmp.pth
+  models/ResNet50_trained_on_korean_idcrad.pth
