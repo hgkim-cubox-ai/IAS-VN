@@ -4,55 +4,72 @@ mode:
 seed:
   777
 save_path:
-  results/tmp
+  results/lr0.0005_th0.3
 distributed:
-  backend: 'gloo'
-  address: 'localhost'
-  port: '12345'
+  backend: gloo
+  address: localhost
+  port: 12345
 
 # Data
-data_path:
-  C:/Users/heegyoon/Desktop/data
-datasets:
-  train:
-    mnist:
-      - train # provided sub-split
-  test:
-    mnist:
-      - test
-  val:
-
-batch_size:
-  256
-num_workers:
-  16
+Data:
+  data_path:
+    C:/Users/heegyoon/Desktop/data/IAS/vn/dataset
+  datasets:
+    train:
+      - TNGo_new
+      - TNGo_new2
+    test:
+      - TNG_Employee
+    val:
+    
+  input:
+    image
+  type:
+    aligned
+  color:
+    rgb
+  size:
+    height:
+      144
+    width:
+      224
+  n_patches:
+    8
+  patch_size:
+    64
+  batch_size:
+    32
+  num_workers:
+    8
 
 # Architecture
 model:
-  ae
-input_dim:
-  784
-latent_dim:
-  2
-hidden_dims:
-  - 512
-  - 512
-  - 32
+  lbp_model
+backbone:
+  resnet50
+regressor:
+  - 2048
+  - 256
+  - 16
+  - 1
 
 # Train
 num_epochs:
   30
 loss_functions:
-  mse:
+  bce:
     weight: 1.0
 optimizer:
   adam
 base_lr:
-  0.001
+  0.0005
 weight_decay:
   0
 adjust_lr:
   False
+threshold:
+  0.3
 
 # Infer
 pretrained_model:
+  models/tmp.pth
