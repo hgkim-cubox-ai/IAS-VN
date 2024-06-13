@@ -13,7 +13,7 @@ class LBPKernel(nn.Module):
         kernel_weight = torch.tensor(
             [
                 [[[0,0,1], [0,-1,0], [0,0,0]]], # top-right
-                [[[0,0,0], [0,-1,1], [0,0,0]]], # top
+                [[[0,0,0], [0,-1,1], [0,0,0]]], # right
                 [[[0,0,0], [0,-1,0], [0,0,1]]], # bottom-right
                 [[[0,0,0], [0,-1,0], [0,1,0]]], # bottom
                 [[[0,0,0], [0,-1,0], [1,0,0]]], # bottom-left
@@ -74,7 +74,9 @@ class LBPModel(nn.Module):
         self.cfg = cfg
         self.backbone = CNN_ResNet(cfg['backbone'])
         self.make_regressor()
-        self.lbp_layer = LBPKernel(cfg['Data']['batch_size'])
+        self.lbp_layer = None
+        if cfg['lbp_in_model']:
+            self.lbp_layer = LBPKernel(cfg['Data']['batch_size'])
         self.fc_lbp = nn.Sequential(
             nn.Linear(256, 256),
             nn.ReLU()
@@ -91,11 +93,11 @@ class LBPModel(nn.Module):
         regressor.append(nn.Sigmoid())
         self.regressor = nn.Sequential(*regressor)
             
-    def forward(self, img):
+    def forward(self, img, lbp_hist=None):
         feat = self.backbone(img)
         feat = feat.view(feat.size(0), -1)  # flatten
-        
-        lbp_hist, lbp_img = self.lbp_layer(img)
+        if self.lbp_layer is not None:
+            lbp_hist, lbp_img = self.lbp_layer(img)
         lbp_hist = self.fc_lbp(lbp_hist)
         feat = torch.cat([feat, lbp_hist], dim=1)
         

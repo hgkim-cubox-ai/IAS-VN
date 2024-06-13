@@ -17,21 +17,29 @@ from idcard import align_idcard
 class PersonData(Dataset):
     def __init__(self, cfg, is_train: bool = True):
         self.cfg = cfg
-        self.transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Resize(
-                (cfg['size']['height'], cfg['size']['width']),
-                transforms.InterpolationMode.BICUBIC
-            ),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.Normalize(mean=0.5, std=0.5)
-        ])
         
         self.img_paths = []
         if is_train:
+            self.transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Resize(
+                    (cfg['size']['height'], cfg['size']['width']),
+                    transforms.InterpolationMode.BICUBIC
+                ),
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.Normalize(mean=0.5, std=0.5)
+            ])
             dataset_list = cfg['datasets']['train']
         else:
             dataset_list = cfg['datasets']['test']
+            self.transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Resize(
+                    (cfg['size']['height'], cfg['size']['width']),
+                    transforms.InterpolationMode.BICUBIC
+                ),
+                transforms.Normalize(mean=0.5, std=0.5)
+            ])
         for dataset in dataset_list:
             paths = glob(os.path.join(cfg['data_path'], dataset, '*/*.*'))
             self.img_paths += [i for i in paths if is_image_file(i)]
@@ -64,12 +72,7 @@ if __name__ == '__main__':
     dataset = PersonData(
         {
             'data_path': 'C:/Users/heegyoon/Desktop/data/IAS/vn/dataset',
-            'patch_size': 256,
-            'n_patches': 9,
             'size': {'height': 144, 'width': 224},
-            'input': 'image',
-            'color': 'rgb',
-            'type': 'aligned',
             'datasets': {
                 'train': ['TNGo_new', 'TNGo_new2'],
                 'test': ['TNG_Employee']

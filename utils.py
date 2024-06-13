@@ -36,7 +36,7 @@ def prepare_path(path: str) -> None:
         raise ValueError(f'Existing path!: {path}')
 
 
-def setup(cfg: Dict[str, Any]) -> int:
+def setup(cfg: Dict[str, Any]) -> Union[int, str]:
     """
     Basic settings for training. (default to multi-gpu)
 
@@ -44,18 +44,21 @@ def setup(cfg: Dict[str, Any]) -> int:
         cfg (Dict[str, Any]): config as dictionary.
 
     Returns:
-        int: rank
+        int: rank in ddp
+        str: cuda:0 or cpu
     """
-    dist.init_process_group(cfg['distributed']['backend'])
-    rank = dist.get_rank()
+    if cfg['mode'] == 'debugging':
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    else:   # train
+        dist.init_process_group(cfg['distributed']['backend'])
+        device = dist.get_rank()
+        seed = cfg['seed'] * dist.get_world_size() + device
+        set_seed(seed)
     
-    seed = cfg['seed'] * dist.get_world_size() + rank
-    set_seed(seed)
-    
-    if rank == 0:
+    if device == 0 or isinstance(device, str):
         prepare_path(cfg['save_path'])
     
-    return rank
+    return device
 
 
 def send_data_dict_to_device(
