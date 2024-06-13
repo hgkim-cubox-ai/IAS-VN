@@ -4,14 +4,6 @@ preprocessing
 results
 tmp
 
-*.json
 *.pth
 *.onnx
 *.txt
-*.jpg
-*.JPG
-*.jpeg
-*.JPEG
-*.png
-*.PNG
-*.bash

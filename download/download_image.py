@@ -1,5 +1,4 @@
 import os
-import argparse
 from tqdm import tqdm
 
 from google.oauth2.credentials import Credentials
