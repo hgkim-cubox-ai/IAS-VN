@@ -16,6 +16,7 @@ def parse_args() -> Dict[str, Any]:
     
     with open(args.cfg, 'r') as f:
         cfg = yaml.safe_load(f)
+        cfg['cfg'] = args.cfg
     
     return cfg
 

@@ -9,6 +9,7 @@ from types_ import *
 from data import PersonData
 from models import MODEL_DICT
 from losses import LOSS_FN_DICT
+from utils import load_state_dict
 
 
 def load_dataloader_dict(cfg: Dict[str, Any]) -> Dict[str, DataLoader]:
@@ -57,15 +58,18 @@ def load_model_and_optimizer(
     # Model
     model = MODEL_DICT[cfg['model']](cfg)
     model.to(device)
-    if cfg['mode'] == 'train':
-        # device = device % torch.cuda.device_count()
-        model = DDP(model, device_ids=[device])
     print(f'Model on device {device}')
     
     # Load weight
     if cfg['pretrained_model'] is not None:
-        saved = torch.load(os.path.join(os.getcwd(), cfg['pretrained_model']))
-        model.load_state_dict(saved['state_dict'])
+        path = cfg['pretrained_model']
+        state_dict = load_state_dict(os.path.join(os.getcwd(), path))
+        model.load_state_dict(state_dict)
+        print(f'Load weights from {path}')
+    
+    if cfg['mode'] == 'train':
+        # device = device % torch.cuda.device_count()
+        model = DDP(model, device_ids=[device])
     
     # Optimizer
     optimizer = None

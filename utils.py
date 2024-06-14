@@ -36,7 +36,7 @@ def prepare_path(path: str) -> None:
         raise ValueError(f'Existing path!: {path}')
 
 
-def setup(cfg: Dict[str, Any]) -> Union[int, str]:
+def setup(cfg: Dict[str, Any]) -> int:
     """
     Basic settings for training. (default to multi-gpu)
 
@@ -44,19 +44,20 @@ def setup(cfg: Dict[str, Any]) -> Union[int, str]:
         cfg (Dict[str, Any]): config as dictionary.
 
     Returns:
-        int: rank in ddp
-        str: cuda:0 or cpu
+        int: rank in ddp or 0
     """
     if cfg['mode'] == 'debugging':
-        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        device = 0
+        seed = cfg['seed']
     else:   # train
         dist.init_process_group(cfg['distributed']['backend'])
         device = dist.get_rank()
         seed = cfg['seed'] * dist.get_world_size() + device
-        set_seed(seed)
+    set_seed(seed)
     
-    if device == 0 or isinstance(device, str):
-        prepare_path(cfg['save_path'])
+    if device == 0:
+        os.makedirs(cfg['save_path'], exist_ok=True)
+        shutil.copy(cfg['cfg'], os.path.join(cfg['save_path'],cfg['cfg'].split('/')[1]))
     
     return device
 
@@ -102,28 +103,36 @@ def is_image_file(filename: str) -> bool:
     return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
 
 
-def calculate_accuracy(pred, label, threshold=0.5):
-    # pred = torch.sigmoid(pred)
-    pred = torch.where(pred > threshold, 1.0, 0.0)
-    acc = (pred == label).float().mean()
-    # acc = (pred.round() == label).float().mean()
+def load_state_dict(path):
+    state_dict = OrderedDict()
+    tmp = torch.load(path)['state_dict']
+    for n, v in tmp.items():
+        if n.startswith('module'):
+            state_dict[n[7:]] = v
+        else:
+            state_dict[n] = v
+    return state_dict
+
+
+def calculate_accuracy(pred, label, th=0.5):
+    acc_dict = {'total': {}, 'real':{}, 'fake': {}}
     
-    pred = pred.view(-1)
+    pred = torch.where(pred > th, 1.0, 0.0).view(-1)
     label = label.view(-1)
-        
-    real_indices = (label == 1).nonzero().view(-1)
-    fake_indices = (label == 0).nonzero().view(-1)
     
-    real_acc = (pred[real_indices] == label[real_indices]).float().sum()
-    fake_acc = (pred[fake_indices] == label[fake_indices]).float().sum()
-    # real_acc = (pred[real_indices].round() == label[real_indices]).float().sum()
-    # fake_acc = (pred[fake_indices].round() == label[fake_indices]).float().sum()
+    idx_r = (label==1).nonzero().view(-1)
+    idx_f = (label==0).nonzero().view(-1)
+    num_correct_r = (pred[idx_r]==label[idx_r]).float().sum().item()
+    num_correct_f = (pred[idx_f]==label[idx_f]).float().sum().item()
     
-    acc.mul_(100)
-    real_acc.div_(len(real_indices) + 1e-8).mul_(100)
-    fake_acc.div_(len(fake_indices) + 1e-8).mul_(100)
-        
-    return acc, real_acc, fake_acc
+    acc_dict['real']['num'] = len(idx_r)
+    acc_dict['real']['correct'] = num_correct_r
+    acc_dict['fake']['num'] = len(idx_f)
+    acc_dict['fake']['correct'] = num_correct_f
+    acc_dict['total']['num'] = len(idx_r) + len(idx_f)
+    acc_dict['total']['correct'] = num_correct_r + num_correct_f
+    
+    return acc_dict
 
 
 def save_checkpoint(is_best, state, save_path):    
@@ -142,7 +151,6 @@ def save_checkpoint(is_best, state, save_path):
             if saved_model.startswith('best'):
                 os.remove(os.path.join(save_path, saved_model))
         shutil.copyfile(file_path, best_file_path)
-
 
 
 class AverageMeter(object):
@@ -167,11 +175,15 @@ class AccuracyMeter(object):
         self.reset()
     
     def reset(self):
-        self.total = 0
-        self.correct = 0
-        self.acc = 0
+        acc_dict = {'num': 1e-8, 'correct': 0, 'acc': 0}
+        self.dict = {
+            'total': acc_dict.copy(),
+            'real': acc_dict.copy(),
+            'fake': acc_dict.copy()
+        }
     
-    def update(self, t, c):
-        self.total += t
-        self.correct += c
-        self.acc = self.correct / self.total * 100
+    def update(self, acc_dict):
+        for k, subdict in acc_dict.items():
+            for n, v in subdict.items():
+                self.dict[k][n] += v
+            self.dict[k]['acc'] = (self.dict[k]['correct']/self.dict[k]['num'])*100

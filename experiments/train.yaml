@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/lr0.0005
+  results/tmp
 distributed:
   backend: gloo
   address: localhost
@@ -17,7 +17,7 @@ Data:
   datasets:
     train:
       - TNGo_new
-      - TNGo_new2
+      # - TNGo_new2
     test:
       - TNG_Employee
   size:
@@ -33,6 +33,8 @@ Data:
 # Architecture
 model:
   lbp_model
+lbp_in_model:
+  True
 backbone:
   resnet50
 regressor:
