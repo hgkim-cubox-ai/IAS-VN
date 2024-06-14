@@ -23,41 +23,44 @@ def load_dataloader_dict(cfg: Dict[str, Any]) -> Dict[str, DataLoader]:
         Dict: {'train': train_loader, 'test': test_loader, 'val': val_loader}
     """
     dataloader_dict = {}
-    all_datasets = cfg['datasets']
+    all_datasets = cfg['Data']['datasets']
     for data_split, dataset_names in all_datasets.items():
         # If test (or val) set is not used.
         if dataset_names is None:
             continue
         
-        dataset = PersonData(cfg, data_split=='train')
-        sampler = DistributedSampler(dataset) if data_split=='train' else None
-        # sampler = None
+        dataset = PersonData(cfg['Data'], data_split=='train')
+        if cfg['mode'] == 'train' and data_split == 'train':
+            sampler = DistributedSampler(dataset)
+        else:
+            sampler = None
+        
         dataloader_dict[data_split] = DataLoader(
-            dataset=dataset, batch_size=cfg['batch_size'],
-            num_workers=cfg['num_workers'], pin_memory=True, sampler=sampler
+            dataset=dataset, batch_size=cfg['Data']['batch_size'],
+            num_workers=cfg['Data']['num_workers'], pin_memory=True,
+            sampler=sampler
         )
     
     return dataloader_dict
 
 
 def load_model_and_optimizer(
-    cfg: Dict[str, Any], rank: int
+    cfg: Dict[str, Any], device: Union[int, str]
 ) -> Tuple[torch.nn.Module, torch.optim.Optimizer]:
     """
     Args:
-        rank (int): if ddp, rank = int. else cpu or cuda:0
+        device (int): if ddp, device = rank(int). else cpu or cuda:0
 
     Returns:
-        Tuple[torch.nn.Module, torch.optim.Optimizer]: model, optimizer.
+       model, optimizer.
     """
-    device_id = rank % torch.cuda.device_count()
-    
     # Model
     model = MODEL_DICT[cfg['model']](cfg)
-    # model.to(rank)
-    model.to(device_id)
-    model = DDP(model, device_ids=[device_id])
-    print(f'Model on rank {rank}')
+    model.to(device)
+    if cfg['mode'] == 'train':
+        # device = device % torch.cuda.device_count()
+        model = DDP(model, device_ids=[device])
+    print(f'Model on device {device}')
     
     # Load weight
     if cfg['pretrained_model'] is not None:

@@ -22,13 +22,13 @@ def parse_args() -> Dict[str, Any]:
 
 def main(cfg):
     # Basic setttings
-    rank = setup(cfg)
+    device = setup(cfg)
     
-    dataloader_dict = load_dataloader_dict(cfg['Data'])
-    model, optimizer = load_model_and_optimizer(cfg, rank)
+    dataloader_dict = load_dataloader_dict(cfg)
+    model, optimizer = load_model_and_optimizer(cfg, device)
     loss_fn_dict = load_loss_fn_dict(cfg)
     
-    train(cfg, rank, dataloader_dict, model, optimizer, loss_fn_dict)
+    train(cfg, device, dataloader_dict, model, optimizer, loss_fn_dict)
 
 
 if __name__ == '__main__':

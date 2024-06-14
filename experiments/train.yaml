@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/tmp
+  results/lr0.0005
 distributed:
   backend: gloo
   address: localhost
@@ -60,3 +60,4 @@ threshold:
 
 # Infer
 pretrained_model:
+  models/ResNet50_trained_on_korean_idcrad.pth
