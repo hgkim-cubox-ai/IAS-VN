@@ -46,19 +46,19 @@ def load_dataloader_dict(cfg: Dict[str, Any]) -> Dict[str, DataLoader]:
 
 
 def load_model_and_optimizer(
-    cfg: Dict[str, Any], device: Union[int, str]
+    cfg: Dict[str, Any], rank: Union[int, str]
 ) -> Tuple[torch.nn.Module, torch.optim.Optimizer]:
     """
     Args:
-        device (int): if ddp, device = rank(int). else cpu or cuda:0
+        rank (int): gpu id
 
     Returns:
        model, optimizer.
     """
     # Model
     model = MODEL_DICT[cfg['model']](cfg)
-    model.to(device)
-    print(f'Model on device {device}')
+    model.to(rank)
+    print(f'Model on device {rank}')
     
     # Load weight
     if cfg['pretrained_model'] is not None:
@@ -68,8 +68,8 @@ def load_model_and_optimizer(
         print(f'Load weights from {path}')
     
     if cfg['mode'] == 'train':
-        # device = device % torch.cuda.device_count()
-        model = DDP(model, device_ids=[device])
+        # rank = rank % torch.cuda.device_count()
+        model = DDP(model, device_ids=[rank])
     
     # Optimizer
     optimizer = None

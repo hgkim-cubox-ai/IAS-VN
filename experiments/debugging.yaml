@@ -9,6 +9,11 @@ distributed:
   backend: gloo
   address: localhost
   port: 12345
+wandb:
+  project:
+    ias-vn
+  name:
+    debugging
 
 # Data
 Data:
@@ -17,7 +22,7 @@ Data:
   datasets:
     train:
       - TNGo_new
-      # - TNGo_new2
+      - TNGo_new2
     test:
       - TNG_Employee
   size:

@@ -3,6 +3,7 @@ __pycache__
 preprocessing
 results
 tmp
+wandb
 
 *.pth
 *.onnx

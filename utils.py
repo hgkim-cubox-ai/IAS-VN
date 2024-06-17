@@ -1,6 +1,7 @@
 import os
 import random
 import shutil
+import wandb
 import numpy as np
 from collections import OrderedDict
 
@@ -47,19 +48,26 @@ def setup(cfg: Dict[str, Any]) -> int:
         int: rank in ddp or 0
     """
     if cfg['mode'] == 'debugging':
-        device = 0
+        rank = 0
         seed = cfg['seed']
     else:   # train
         dist.init_process_group(cfg['distributed']['backend'])
-        device = dist.get_rank()
-        seed = cfg['seed'] * dist.get_world_size() + device
+        rank = dist.get_rank()
+        seed = cfg['seed'] * dist.get_world_size() + rank
     set_seed(seed)
     
-    if device == 0:
+    if rank == 0:
         os.makedirs(cfg['save_path'], exist_ok=True)
         shutil.copy(cfg['cfg'], os.path.join(cfg['save_path'],cfg['cfg'].split('/')[1]))
+        wandb.init(
+            project=cfg['wandb']['project'],
+            name=cfg['wandb']['name'],
+            config={
+                'learning_rate': cfg['base_lr']
+            }
+        )
     
-    return device
+    return rank
 
 
 def send_data_dict_to_device(
@@ -71,7 +79,7 @@ def send_data_dict_to_device(
 
     Args:
         data (Dict[str, Any]): data dictionary from data loader
-        rank (int): cpu or cuda or rank
+        rank (int): gpu id
 
     Returns:
         Dict[str, Any]: data dictionary on rank
