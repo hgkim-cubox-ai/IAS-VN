@@ -1,70 +1,7 @@
 import os
 from tqdm import tqdm
 
-from google.oauth2.credentials import Credentials
-from google.auth.transport.requests import Request
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
-
-
-def authenticate(token_path, OAuth_key_path):
-    # If modifying these scopes, delete the file token.json.
-    SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
-    creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    if os.path.exists(token_path):
-        creds = Credentials.from_authorized_user_file(token_path)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                OAuth_key_path, SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        with open(token_path, 'w') as token:
-            token.write(creds.to_json())
-    return creds
-
-
-def list_up(service, folder_id, is_file):
-    query = f"'{folder_id}' in parents and trashed=false and "
-    if is_file:
-        query += "mimeType!='application/vnd.google-apps.folder'"
-    else:   # folder
-        query += "mimeType='application/vnd.google-apps.folder'"
-    page_token = None
-    files = []
-    
-    while True:
-        response = service.files().list(
-            q=query,
-            fields='nextPageToken, files(id, name)',
-            pageSize=100,  # 각 페이지에 100개씩 가져옴
-            pageToken=page_token
-        ).execute()
-
-        files.extend(response.get('files', []))
-
-        page_token = response.get('nextPageToken', None)
-        if page_token is None:
-            break
-    
-    return files    # list[Dict[id, name]]
-
-
-def download_file(service, file_id, save_to):
-    request = service.files().get_media(fileId=file_id)
-    with open(save_to, 'wb') as fh:
-        downloader = MediaIoBaseDownload(fh, request)
-        done = False
-        while done is False:
-            status, done = downloader.next_chunk()
-    return done
+from google_api import get_service, list_up, download_file
 
 
 def TNG_Employee_data(service):
@@ -250,25 +187,231 @@ def TNGo_new3_data(service):
 
     with open(log_path, 'w', encoding='utf-8') as f:
         f.writelines(log)
-    
 
-if __name__ == "__main__":
+
+def TNG_Employee_dataset(service, dataset_dir):
+    file_dict = {}
+    
+    # Person directory except fake_paper
+    CCCD_id = '1OS6DW5SVGS5BjAgEOHew6HcVr2rlu9wb'
+    person_list = sorted(list_up(service, CCCD_id, False), key=lambda x: x['name'])
+    for person in person_list:
+        person_name = person['name']
+        person_id = person['id']
+        
+        person_dir = os.path.join(dataset_dir, person_name)
+        os.makedirs(person_dir, exist_ok=True)
+                
+        label_list = list_up(service, person_id, False)
+        for label in label_list:
+            label_name = label['name']  # Real/Fake
+            label_id = label['id']
+            
+            label_dir = os.path.join(person_dir, label_name)
+            os.makedirs(label_dir)
+            
+            file_list = list_up(service, label_id, True)
+            for file in file_list:
+                file_id = file['id']
+                file_name = file['name']
+                save_path = os.path.join(dataset_dir, person_name, label_name, file_name)
+                
+                file_dict[file_id] = [
+                    f'{person_name}/{label_name}/{file_name}',
+                    save_path
+                ]
+
+    # Fake_paper
+    paper_id = '1m39ssjJq5nJxMRfIYBH-fWKIE7lI97Za'
+    paper_dir = os.path.join(dataset_dir, 'Employee_Fake_Paper')
+    os.makedirs(paper_dir, exist_ok=True)
+    
+    file_list = list_up(service, paper_id, True)
+    for file in file_list:
+        file_id = file['id']
+        file_name = file['name']
+        save_path = os.path.join(paper_dir, file_name)
+        
+        file_dict[file_id] = [
+            f'Employee_Fake_Paper/{file_name}',
+            save_path
+        ]
+    
+    return file_dict
+
+
+def TNGo_new_dataset(service, dataset_dir):
+    file_dict = {}
+    dataset_id = '1j-PkGIExdAd7t8iI2MAYRz1R4ySQHDRI'
+    
+    # Laptop/Monitor/Paper/Phone/Real
+    label_list = sorted(list_up(service, dataset_id, False), key=lambda x: x['name'])
+    for label in label_list:
+        label_id = label['id']
+        label_name = label['name']
+        
+        label_dir = os.path.join(dataset_dir, label_name)
+        os.mkdir(label_dir)
+        
+        # Images
+        file_list = list_up(service, label_id, True)
+        for file in file_list:
+            file_id = file['id']
+            file_name = file['name']
+            save_path = os.path.join(label, file_name)
+            
+            file_dict[file_id] = [
+                f'{label_name}/{file_name}',
+                save_path
+            ]
+    
+    return file_dict
+
+
+def TNGo_new2_dataset(service, dataset_dir):
+    file_dict = {}
+    
+    # Real data
+    real_id = '1zcC_HiqTFgESFHYRgfO277Y31pbYwutq'
+    real_dir = os.path.join(dataset_dir, 'Real')
+    os.makedirs(real_dir, exist_ok=True)
+    
+    worker_list = sorted(list_up(service, real_id, False), key=lambda x: x['name'])
+    for worker in worker_list:
+        worker_id = worker['id']
+        worker_name = worker['name']
+        
+        worker_dir = os.path.join(real_dir, worker_name)
+        os.mkdir(worker_dir)
+        
+        file_list = list_up(service, worker_id, True)
+        for file in file_list:
+            file_id = file['id']
+            file_name = file['name']
+            save_path = os.path.join(worker_dir, file_name)
+            
+            file_dict[file_id] = [
+                f'{worker_name}/{file_name}',
+                save_path
+            ]
+    
+    # Others
+    root_id = '1-RFnI2gQsfz1ataWltjqozAnkKnOQmRL'
+    fake_list = sorted(list_up(service, root_id, False), key=lambda x: x['name'])
+    for fake in fake_list:
+        fake_id = fake['id']
+        fake_name = fake['name']
+        if not fake_name.startswith('Tngo'): # label, Real directory
+            continue
+        
+        fake_dir = os.path.join(dataset_dir, fake_name)
+        os.mkdir(fake_dir)
+        
+        file_list = list_up(service, fake_id, True)
+        for file in file_list:
+            file_id = file['id']
+            file_name = file['name']
+            save_path = os.path.join(fake_dir, file_name)
+            
+            file_dict[file_id] = [
+                f'{fake_name}/{file_name}',
+                save_path
+            ]
+    
+    return file_dict
+
+
+def TNGo_new3_dataset(service, dataset_dir):
+    file_dict = {}
+    
+    root_id = '1989_NGBpdq2KmbexiEVEUlvJi4_oljij'
+    label_list = sorted(list_up(service, root_id, False), key=lambda x: x['name'])
+    for label in label_list:
+        label_id = label['id']
+        label_name = label['name']
+        
+        # Json directory
+        if label_name.startswith('2024'):
+            continue
+        
+        label_dir = os.path.join(dataset_dir, label)
+        os.makedirs(label_dir, exist_ok=True)
+        
+        # Real data
+        if label_name == 'Real':            
+            worker_list = sorted(list_up(service, label_id, False), key=lambda x: x['name'])
+            for worker in worker_list:
+                worker_id = worker['id']
+                worker_name = worker['name']
+                
+                worker_dir = os.path.join(label_dir, worker_name)
+                os.makedirs(worker_dir, exist_ok=True)
+                
+                file_list = list_up(service, worker_id, True)
+                for file in tqdm(file_list, worker_name):
+                    file_id = file['id']
+                    file_name = file['name']
+                    save_path = os.path.join(worker_dir, file_name)
+                    
+                    file_dict[file_id] = [
+                        f'{worker_name}/{file_name}',
+                        save_path
+                    ]        
+        # Fake
+        elif 'tngo' in label_name:
+            file_list = sorted(list_up(service, label_id, True), key=lambda x: x['name'])
+            for file in tqdm(file_list, label_name):
+                file_id = file['id']
+                file_name = file['name']
+                save_path = os.path.join(label_dir, file_name)
+                
+                file_dict[file_id] = [
+                    f'{label_name}/{file_name}',
+                    save_path
+                ]
+        else:
+            raise ValueError(f'Wrong label name: {label_name}')
+    
+    return file_dict
+
+
+
+def main():
     # Set service
     token_path = 'download/token.json'
     OAuth_key_path = 'download/client_secret.json'
-    creds = authenticate(token_path, OAuth_key_path)
-    service = build('drive', 'v3', credentials=creds)
+    service = get_service(token_path, OAuth_key_path)
     
-    data_dict = {
-        'TNG_Employee': {},
-        'TNGo_new': {},
-        'TNGo_new2': {},
-        'TNGo_new3': {},
-        'TNGo_new4': {}
+    # Root directory
+    root_dir = 'C:/Users/heegyoon/Desktop/data/IAS/vn/raw2'
+    
+    dataset_dict = {
+        'TNG_Employee': TNG_Employee_dataset,
+        'TNGo_new': TNGo_new_dataset,
+        'TNGo_new2': TNGo_new2_dataset,
+        'TNGo_new3': TNGo_new3_dataset,
+        # 'TNGo_new4': 
     }
     
-    # TNGo_new_data(service)
-    # TNG_Employee_data(service)
-    # TNGo_new2_data(service)
-    TNGo_new3_data(service)
+    for dataset_name, func in dataset_dict.items():
+        log = []
+        dataset_dir = os.path.join(root_dir, dataset_name)
+        os.makedirs(dataset_dir, exist_ok=True)
+        
+        file_dict = func(service, dataset_dir)
+        for file_id, path in tqdm(file_dict.items(), desc=f'{dataset_name}'):
+            # path[0]: path from google drive, path[1]: save_path
+            ret = download_file(service, file_id, path[1])
+            if not ret:
+                log.append(f'{path[0]}, download fail.\n')
+            
+        log_path = os.path.join(root_dir, dataset_name, 'log_download.txt')
+        with open(log_path, 'r', encoding='utf-8') as f:
+            f.writelines(log)
+
+
+if __name__ == "__main__":
+    main()
     print('Done')
+    
+    # python download/download.py
