@@ -258,7 +258,7 @@ def TNGo_new_dataset(service, dataset_dir):
         for file in file_list:
             file_id = file['id']
             file_name = file['name']
-            save_path = os.path.join(label, file_name)
+            save_path = os.path.join(label_dir, file_name)
             
             file_dict[file_id] = [
                 f'{label_name}/{file_name}',
@@ -386,10 +386,10 @@ def main():
     root_dir = 'C:/Users/heegyoon/Desktop/data/IAS/vn/raw2'
     
     dataset_dict = {
-        'TNG_Employee': TNG_Employee_dataset,
+        # 'TNG_Employee': TNG_Employee_dataset,
         'TNGo_new': TNGo_new_dataset,
-        'TNGo_new2': TNGo_new2_dataset,
-        'TNGo_new3': TNGo_new3_dataset,
+        # 'TNGo_new2': TNGo_new2_dataset,
+        # 'TNGo_new3': TNGo_new3_dataset,
         # 'TNGo_new4': 
     }
     
@@ -406,7 +406,7 @@ def main():
                 log.append(f'{path[0]}, download fail.\n')
             
         log_path = os.path.join(root_dir, dataset_name, 'log_download.txt')
-        with open(log_path, 'r', encoding='utf-8') as f:
+        with open(log_path, 'w', encoding='utf-8') as f:
             f.writelines(log)
 
 
