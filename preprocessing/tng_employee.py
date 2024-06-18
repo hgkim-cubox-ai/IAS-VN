@@ -192,22 +192,6 @@ def main():
             shutil.move(src_person_dir, dst_person_dir)
 
 
-def move_directory():
-    src_dir = 'C:\\Users\\heegyoon\\Desktop\\data\\IAS\\vn\\tmp\\TNG_Employee'
-    dst_dir = 'C:\\Users\\heegyoon\\Desktop\\data\\IAS\\vn\\dataset\\TNG_Employee'
-    os.makedirs(dst_dir, exist_ok=True)
-    
-    person_list = os.listdir(src_dir)
-    for person in person_list:
-        src_person_dir = os.path.join(src_dir, person)
-        
-        files = os.listdir(src_person_dir)
-        if len(files) == 40:
-            dst_person_dir = os.path.join(dst_dir, person)
-            shutil.move(src_person_dir, dst_person_dir)
-
-
 if __name__ == '__main__':
     main()
-    # move_directory()
     print('Done')
