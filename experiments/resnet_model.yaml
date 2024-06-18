@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/resnet_model/18_lr0.0005
+  results/resnet_model/18_lr0.005
 distributed:
   backend: gloo
   address: localhost
@@ -13,12 +13,12 @@ wandb:
   project:
     ias-vn
   name:
-    resnet18_lr0.0005
+    resnet18_lr0.005
 
 # Data
 Data:
   data_path:
-    C:/Users/heegyoon/Desktop/data/IAS/vn/dataset
+    /purestorage/datasets/IAS/vn/dataset
   datasets:
     train:
       - TNGo_new
@@ -50,14 +50,14 @@ regressor:
 
 # Train
 num_epochs:
-  30
+  100
 loss_functions:
   bce:
     weight: 1.0
 optimizer:
   adam
 base_lr:
-  0.0005
+  0.005
 weight_decay:
   0
 adjust_lr:
