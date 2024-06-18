@@ -4,7 +4,6 @@ preprocessing
 results
 tmp
 wandb
-experiments
 
 *.pth
 *.onnx

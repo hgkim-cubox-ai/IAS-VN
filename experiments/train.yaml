@@ -1,0 +1,65 @@
+# Setup
+mode:
+  train
+seed:
+  777
+save_path:
+  results/tmp
+distributed:
+  backend: gloo
+  address: localhost
+  port: 12345
+
+# Data
+Data:
+  data_path:
+    C:/Users/heegyoon/Desktop/data/IAS/vn/dataset
+  datasets:
+    train:
+      - TNGo_new
+      # - TNGo_new2
+    test:
+      - TNG_Employee
+  size:
+    height:
+      144
+    width:
+      224
+  batch_size:
+    32
+  num_workers:
+    8
+
+# Architecture
+model:
+  lbp_model
+lbp_in_model:
+  True
+backbone:
+  resnet50
+regressor:
+  - 2048
+  - 256
+  - 16
+  - 1
+
+# Train
+num_epochs:
+  30
+loss_functions:
+  bce:
+    weight: 1.0
+optimizer:
+  adam
+base_lr:
+  0.0005
+weight_decay:
+  0
+adjust_lr:
+  False
+threshold:
+  0.3
+
+# Infer
+pretrained_model:
+  models/ResNet50_trained_on_korean_idcrad.pth
