@@ -259,6 +259,14 @@ if __name__ == "__main__":
     creds = authenticate(token_path, OAuth_key_path)
     service = build('drive', 'v3', credentials=creds)
     
+    data_dict = {
+        'TNG_Employee': {},
+        'TNGo_new': {},
+        'TNGo_new2': {},
+        'TNGo_new3': {},
+        'TNGo_new4': {}
+    }
+    
     # TNGo_new_data(service)
     # TNG_Employee_data(service)
     # TNGo_new2_data(service)
