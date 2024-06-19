@@ -334,7 +334,7 @@ def TNGo_new3_dataset(service, dataset_dir):
         if label_name.startswith('2024'):
             continue
         
-        label_dir = os.path.join(dataset_dir, label)
+        label_dir = os.path.join(dataset_dir, label_name)
         os.makedirs(label_dir, exist_ok=True)
         
         # Real data
@@ -348,7 +348,7 @@ def TNGo_new3_dataset(service, dataset_dir):
                 os.makedirs(worker_dir, exist_ok=True)
                 
                 file_list = list_up(service, worker_id, True)
-                for file in tqdm(file_list, worker_name):
+                for file in file_list, worker_name:
                     file_id = file['id']
                     file_name = file['name']
                     save_path = os.path.join(worker_dir, file_name)
@@ -360,7 +360,7 @@ def TNGo_new3_dataset(service, dataset_dir):
         # Fake
         elif 'tngo' in label_name:
             file_list = sorted(list_up(service, label_id, True), key=lambda x: x['name'])
-            for file in tqdm(file_list, label_name):
+            for file in file_list, label_name:
                 file_id = file['id']
                 file_name = file['name']
                 save_path = os.path.join(label_dir, file_name)
@@ -387,9 +387,9 @@ def main():
     
     dataset_dict = {
         # 'TNG_Employee': TNG_Employee_dataset,
-        'TNGo_new': TNGo_new_dataset,
+        # 'TNGo_new': TNGo_new_dataset,
         # 'TNGo_new2': TNGo_new2_dataset,
-        # 'TNGo_new3': TNGo_new3_dataset,
+        'TNGo_new3': TNGo_new3_dataset,
         # 'TNGo_new4': 
     }
     
