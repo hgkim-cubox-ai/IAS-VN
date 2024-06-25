@@ -49,7 +49,7 @@ def TNG_Employee(service, dataset_dir, id):
                             save_path
                         ]
         # Fake paper
-        elif 'paper' in label_name.lower():    
+        elif 'paper' in folder_name.lower():
             file_list = list_up(service, folder_id, True)
             for file in file_list:
                 file_id = file['id']
@@ -155,21 +155,21 @@ def main():
     os.makedirs(root_dir, exist_ok=True)
     
     dataset_dict = {
-        # 'TNG_Employee': {
-        #     'fn': TNG_Employee, 'id': '1aXqx-bYC-Z3aPwtcrSH1g1maAVCKUvPP'
-        # # },
+        'TNG_Employee': {
+            'fn': TNG_Employee, 'id': '1aXqx-bYC-Z3aPwtcrSH1g1maAVCKUvPP'
+        },
         # 'TNGo_new': {
         #     'fn': TNGo_new, 'id': '1j-PkGIExdAd7t8iI2MAYRz1R4ySQHDRI'
         # },
-        'TNGo_new2': {
-            'fn': TNGo_new234, 'id': '1-RFnI2gQsfz1ataWltjqozAnkKnOQmRL'
-        },
-        'TNGo_new3': {
-            'fn': TNGo_new234, 'id': '1989_NGBpdq2KmbexiEVEUlvJi4_oljij'
-        },
-        'TNGo_new4': {
-            'fn': TNGo_new234, 'id': '1uDtPgXSPkFWcKP-X2OVLtbTSasL7wGNJ'
-        }
+        # 'TNGo_new2': {
+        #     'fn': TNGo_new234, 'id': '1-RFnI2gQsfz1ataWltjqozAnkKnOQmRL'
+        # },
+        # 'TNGo_new3': {
+        #     'fn': TNGo_new234, 'id': '1989_NGBpdq2KmbexiEVEUlvJi4_oljij'
+        # },
+        # 'TNGo_new4': {
+        #     'fn': TNGo_new234, 'id': '1uDtPgXSPkFWcKP-X2OVLtbTSasL7wGNJ'
+        # }
     }
     
     for dataset_name, info in dataset_dict.items():

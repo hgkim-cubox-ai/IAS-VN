@@ -11,28 +11,29 @@ from idcard import get_keypoints
 
 
 def convert_path(label, data_dir):
-    drive_path = label['drive_path']
+    annot_path = label['annot_path']
     dataset_name = os.path.basename(data_dir)
     
     if dataset_name == 'TNG_Employee':
         if label['spoof_type'] == 'Paper':
-            dirname = os.path.basename(os.path.dirname(drive_path))
+            dirname = os.path.basename(os.path.dirname(annot_path))
         else:
-            dirname1 = label['person_name']
-            dirname2 = os.path.basename(os.path.dirname(drive_path))
-            dirname = os.path.join(dirname1, dirname2)        
+            d1 = annot_path.split('/')[4]
+            d2 = label['person_name']
+            d3 = os.path.basename(os.path.dirname(annot_path))
+            dirname = os.path.join(d1, d2, d3)
     elif dataset_name == 'TNGo_new':
-        dirname = os.path.basename(os.path.dirname(drive_path))
+        dirname = os.path.basename(os.path.dirname(annot_path))
     elif dataset_name >= 'TNGo_new2':   # new2, new3, new4
         if label['spoof_label'] == 'Real':
-            dirname1 = 'Real'
-            dirname2 = unquote(os.path.basename(os.path.dirname(drive_path)))
-            dirname = os.path.join(dirname1, dirname2)
+            d1 = 'Real'
+            d2 = unquote(os.path.basename(os.path.dirname(annot_path)))
+            dirname = os.path.join(d1, d2)
         else:
-            dirname = os.path.basename(os.path.dirname(drive_path))
+            dirname = os.path.basename(os.path.dirname(annot_path))
     else:
         raise ValueError('Wrong dataset name.')
-    filename = os.path.basename(drive_path)
+    filename = os.path.basename(annot_path)
     img_path = os.path.join(data_dir, dirname, filename)
     
     # File does not exits or wrong extenstion
@@ -55,7 +56,7 @@ def json_to_personal_label(data):
         'quality_type': None,
         'image_width': None,
         'image_height': None,
-        'drive_path': None,
+        'annot_path': None,
         'image_path': None,
         'keypoints': None,
         'segmentation': None
@@ -90,7 +91,7 @@ def json_to_personal_label(data):
         # Quality type
         if annot['from_name'] == 'quality_type':
             label['quality_type'] = annot['value']['choices'][0]
-    label['drive_path'] = data['data']['image']
+    label['annot_path'] = data['data']['image']
     
     # Convert 'None' to None
     for k, v in label.items():
@@ -175,25 +176,15 @@ def main():
     os.makedirs(tmp_dir, exist_ok=True)
     os.makedirs(dst_dir, exist_ok=True)
     
-    dataset_dict = {
-        # 'TNG_Employee': ['fake_paper.json', 'others.json'],
-        # 'TNGo_new': ['Fake_Laptop.json', 'Fake_Monitor.json', 'Fake_Paper.json',
-        #              'Fake_SmartPhone.json', 'Real.json'],
-        # 'TNGo_new2': ['Fake_Laptop.json', 'Fake_Monitor.json', 'Fake_Paper.json',
-        #               'Fake_SmartPhone.json', 'Real.json'],
-        'TNGo_new3': ['Laptop.json', 'Monitor.json', 'Paper.json', 'Real.json',
-                      'SmartPhone.json'],
-        # 'TNGo_new4': []
-    }
-    
-    for dataset_name, json_files in dataset_dict.items():
+    dataset_list = sorted(os.listdir(raw_dir))[:-1]
+    for dataset_name in dataset_list:
         cur_dir = os.path.join(raw_dir, dataset_name)
-        for json_file in json_files:
-            json_path = os.path.join(raw_dir, dataset_name, json_file)
+        for json_file in os.listdir(os.path.join(cur_dir, 'json')):
+            json_path = os.path.join(cur_dir, 'json', json_file)
             
             with open(json_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            
+
             # Each data
             for d in tqdm(data, desc=f'{dataset_name}/{json_file}'):
                 label = json_to_personal_label(d)

@@ -1,10 +1,14 @@
 import os
+import time
+from httplib2 import Http
 
+import google_auth_httplib2
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.http import HttpError
 
 
 def authenticate(token_path, OAuth_key_path):
@@ -56,17 +60,30 @@ def list_up(service, folder_id, is_file):
     return files    # list[Dict[id, name]]
 
 
-def download_file(service, file_id, save_to):
+def download_file(service, file_id, save_to, max_retries=5):
     request = service.files().get_media(fileId=file_id)
     with open(save_to, 'wb') as fh:
         downloader = MediaIoBaseDownload(fh, request)
         done = False
+        retries = 0
         while done is False:
-            _, done = downloader.next_chunk()
+            try:
+                _, done = downloader.next_chunk()
+            except HttpError as e:
+                if retries < max_retries:
+                    retries += 1
+                    print(f"Retrying... ({retries}/{max_retries})")
+                    time.sleep(2 ** retries)  # Exponential backoff
+                else:
+                    print(f"Failed to download file after {max_retries} attempts.")
+                    raise e
     return done
 
 
 def get_service(token_path, OAuth_key_path):
     creds = authenticate(token_path, OAuth_key_path)
-    service = build('drive', 'v3', credentials=creds)
+    http = google_auth_httplib2.AuthorizedHttp(creds, Http(timeout=60))
+    # http = Http(timeout=60)
+    service = build('drive', 'v3', http=http)
+    # service = build('drive', 'v3', credentials=creds)
     return service
