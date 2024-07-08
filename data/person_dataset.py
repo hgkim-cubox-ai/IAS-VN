@@ -16,8 +16,14 @@ from idcard import align_idcard
 
 class PersonData(Dataset):
     def __init__(self, cfg, is_train: bool = True):
-        self.cfg = cfg
-        
+        self.label_dict = {
+            'Real': 0,
+            'Laptop': 1,
+            'Monitor': 2,
+            'Paper': 3,
+            'SmartPhone': 4
+        }
+        self.cfg = cfg 
         self.img_paths = []
         if is_train:
             self.transform = transforms.Compose([
