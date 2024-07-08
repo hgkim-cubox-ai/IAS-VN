@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/resnet_model/18
+  results/resnet_model/18_lr0.005
 distributed:
   backend: gloo
   address: localhost
