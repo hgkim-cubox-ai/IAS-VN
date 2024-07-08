@@ -83,7 +83,7 @@ class LBPModel(nn.Module):
         )
 
     def make_regressor(self):
-        fc_in = 2048+256 if self.cfg['backbone'] > 'resnet18' else 512+256
+        fc_in = 2048+256 if self.cfg['backbone'] > 'resnet34' else 512+256
         
         regressor = []
         regressor.append(nn.Linear(fc_in, self.cfg['regressor'][0]))

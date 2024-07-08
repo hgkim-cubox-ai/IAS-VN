@@ -8,6 +8,8 @@ class CNN_ResNet(nn.Module):
         
         if backbone == 'resnet18':
             model = models.resnet18()
+        elif backbone == 'resnet34':
+            model = models.resnet34()
         elif backbone == 'resnet50':
             model = models.resnet50()
         elif backbone == 'resnet101':
