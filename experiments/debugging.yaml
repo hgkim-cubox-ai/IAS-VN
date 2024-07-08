@@ -42,7 +42,7 @@ model:
 lbp_in_model:
   True
 backbone:
-  resnet18
+  resnet34
 regressor:
   - 2048
   - 256
