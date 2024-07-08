@@ -80,9 +80,10 @@ if __name__ == '__main__':
             'size': {'height': 144, 'width': 224},
             'datasets': {
                 'train': [
-                    'TNGo_new',
+                    # 'TNGo_new',
                     # 'TNGo_new2',
-                    # 'TNGo_new3'
+                    # 'TNGo_new3',
+                    'TNG_Employee'
                 ],
                 'test': ['TNG_Employee']
             }
@@ -94,3 +95,10 @@ if __name__ == '__main__':
     for i, (input_dict) in enumerate(loader):
         # print(input_dict['input'].size(), input_dict['label'])
         a = 1
+
+'''
+TNG_Employee:   74명,  6746 images
+TNGo_new:       362명, 3630 images
+TNGo_new2:      431명, 4310 images
+TNGo_new3:      320명, 3200 images
+'''
