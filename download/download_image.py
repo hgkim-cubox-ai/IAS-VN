@@ -36,7 +36,7 @@ def TNG_Employee(service, dataset_dir, id):
                     label_id = label['id']
                     
                     label_dir = os.path.join(person_dir, label_name)
-                    os.makedirs(label_dir)
+                    os.makedirs(label_dir, exist_ok=True)
                     
                     file_list = list_up(service, label_id, True)
                     for file in file_list:

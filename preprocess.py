@@ -16,29 +16,25 @@ def convert_path(label, data_dir):
     
     if dataset_name == 'TNG_Employee':
         if label['spoof_type'] == 'Paper':
-            dirname = os.path.basename(os.path.dirname(annot_path))
+            dirname = annot_path.split('/')[4]
         else:
             d1 = annot_path.split('/')[4]
             d2 = label['person_name']
             d3 = os.path.basename(os.path.dirname(annot_path))
             dirname = os.path.join(d1, d2, d3)
     elif dataset_name == 'TNGo_new':
-        dirname = os.path.basename(os.path.dirname(annot_path))
+        dirname = annot_path.split('/')[5]
     elif dataset_name >= 'TNGo_new2':   # new2, new3, new4
         if label['spoof_label'] == 'Real':
             d1 = 'Real'
-            d2 = unquote(os.path.basename(os.path.dirname(annot_path)))
+            d2 = unquote(annot_path.split('/')[5])
             dirname = os.path.join(d1, d2)
         else:
-            dirname = os.path.basename(os.path.dirname(annot_path))
+            dirname = annot_path.split('/')[4]
     else:
         raise ValueError('Wrong dataset name.')
     filename = os.path.basename(annot_path)
     img_path = os.path.join(data_dir, dirname, filename)
-    
-    # File does not exits or wrong extenstion
-    if not (os.path.exists(img_path) and is_image_file(img_path)):
-        img_path = None
     
     return img_path
 
@@ -129,7 +125,8 @@ def check_label(label):
 def add_annotations(label, data_dir):
     # Image path in local
     img_path = convert_path(label, data_dir)
-    if img_path == None:
+    # File does not exits or wrong extenstion
+    if not (os.path.exists(img_path) and is_image_file(img_path)):
         return None
     label['image_path'] = img_path
     
@@ -176,11 +173,12 @@ def main():
     os.makedirs(tmp_dir, exist_ok=True)
     os.makedirs(dst_dir, exist_ok=True)
     
-    dataset_list = sorted(os.listdir(raw_dir))[:-1]
+    dataset_list = sorted(os.listdir(raw_dir))[3:4]
     for dataset_name in dataset_list:
         cur_dir = os.path.join(raw_dir, dataset_name)
-        for json_file in os.listdir(os.path.join(cur_dir, 'json')):
-            json_path = os.path.join(cur_dir, 'json', json_file)
+        json_dir = os.path.join(cur_dir, 'json')
+        for json_file in os.listdir(json_dir):
+            json_path = os.path.join(json_dir, json_file)
             
             with open(json_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -196,19 +194,42 @@ def main():
                     continue
                 
                 person_name = label['person_name']
-                dst_dir = os.path.join(tmp_dir, dataset_name, person_name)
-                os.makedirs(dst_dir, exist_ok=True)
+                person_dir = os.path.join(tmp_dir, dataset_name, person_name)
+                os.makedirs(person_dir, exist_ok=True)
                 
-                filename = make_filname(label, dst_dir)
+                filename = make_filname(label, person_dir)
                 src_path = label['image_path']
-                dst_path = os.path.join(dst_dir, filename + os.path.splitext(src_path)[1])
-                json_path = os.path.join(dst_dir, filename + '.json')
+                dst_path = os.path.join(person_dir, filename + os.path.splitext(src_path)[1])
+                json_path = os.path.join(person_dir, filename + '.json')
                 
                 # Move image & save json
-                shutil.copy(src_path, dst_path)
+                shutil.move(src_path, dst_path)
                 with open(json_path, 'w', encoding='utf-8') as f:
                     json.dump(label, f, ensure_ascii=False, indent=4)
+        
+        cur_dir = os.path.join(tmp_dir, dataset_name)
+        os.makedirs(os.path.join(dst_dir, dataset_name), exist_ok=True)
+        person_list = os.listdir(cur_dir)
+        for person in person_list:
+            src_person_dir = os.path.join(cur_dir, person)
             
+            files = os.listdir(src_person_dir)
+            file_names = [os.path.splitext(f)[0] for f in files]
+            valid_file_names = [f for f in file_names if f.endswith('_0')]
+            
+            if dataset_name != 'TNG_Employee':
+                if len(valid_file_names) != 20:
+                    continue
+                if len(valid_file_names) != len(file_names):
+                    continue
+            
+            if person in os.listdir(os.path.join(dst_dir, dataset_name)):
+                print(f'{person} already exists.')
+                continue
+                
+            dst_person_dir = os.path.join(dst_dir, dataset_name, person)
+            shutil.move(src_person_dir, dst_person_dir)
+        
 
 
 if __name__ == '__main__':

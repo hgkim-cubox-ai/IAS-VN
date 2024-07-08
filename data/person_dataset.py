@@ -56,7 +56,6 @@ class PersonData(Dataset):
         return img, annots
         
     def preprocess_input(self, img, annots):
-        img = align_idcard(img, annots['keypoints'])
         img = img[:, :, ::-1].copy()    # BGR to RGB
         img = self.transform(img)
         label = 1.0 if annots['spoof_label'] == 'Real' else 0.0
@@ -74,7 +73,11 @@ if __name__ == '__main__':
             'data_path': 'C:/Users/heegyoon/Desktop/data/IAS/vn/dataset',
             'size': {'height': 144, 'width': 224},
             'datasets': {
-                'train': ['TNGo_new', 'TNGo_new2'],
+                'train': [
+                    'TNGo_new',
+                    # 'TNGo_new2',
+                    # 'TNGo_new3'
+                ],
                 'test': ['TNG_Employee']
             }
         }
@@ -83,4 +86,5 @@ if __name__ == '__main__':
     loader = DataLoader(dataset, 1, True)
     
     for i, (input_dict) in enumerate(loader):
-        print(input_dict['input'].size(), input_dict['label'])
+        # print(input_dict['input'].size(), input_dict['label'])
+        a = 1
