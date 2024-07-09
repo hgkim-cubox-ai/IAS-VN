@@ -63,6 +63,7 @@ class PersonData(Dataset):
         
     def preprocess_input(self, img, annots):
         img = img[:, :, ::-1].copy()    # BGR to RGB
+        img = align_idcard(img, annots['keypoints'])
         img = self.transform(img)
         label = 1.0 if annots['spoof_label'] == 'Real' else 0.0
         return {'input': img, 'label': torch.tensor(label).float()}
