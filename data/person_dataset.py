@@ -48,7 +48,7 @@ class PersonData(Dataset):
                 transforms.Normalize(mean=0.5, std=0.5)
             ])
         for dataset in dataset_list:
-            paths = glob(os.path.join(cfg['data_path'], dataset, '*/*.*'))
+            paths = glob(os.path.join(cfg['data_path'], dataset, '*/*_0.*'))
             self.img_paths += [i for i in paths if is_image_file(i)]
         self.json_paths = [os.path.splitext(i)[0]+'.json' for i in self.img_paths]            
         
