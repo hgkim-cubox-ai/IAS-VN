@@ -13,8 +13,7 @@ class ResNetModel(nn.Module):
         self.make_regressor()
     
     def make_regressor(self):
-        backbone = self.cfg['backbone']
-        fc_in = 2048 if int(backbone[6:]) > 'resnet34' else 512
+        fc_in = 2048 if int(self.cfg['backbone'][6:]) > 34 else 512
         
         regressor = []
         regressor.append(nn.Linear(fc_in, self.cfg['regressor'][0]))
