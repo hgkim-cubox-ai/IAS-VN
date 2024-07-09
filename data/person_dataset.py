@@ -33,6 +33,7 @@ class PersonData(Dataset):
                     transforms.InterpolationMode.BICUBIC
                 ),
                 transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomVerticalFlip(p=0.5),
                 transforms.Normalize(mean=0.5, std=0.5)
             ])
             dataset_list = cfg['datasets']['train']
