@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/resnet_model/18_0.005
+  results/resnet_model/18_0.001
 distributed:
   backend: gloo
   address: localhost
@@ -13,7 +13,7 @@ wandb:
   project:
     ias-vn
   name:
-    resnet18_lr0.005
+    resnet18_lr0.001
 
 # Data
 Data:
@@ -57,7 +57,7 @@ loss_functions:
 optimizer:
   adam
 base_lr:
-  0.005
+  0.001
 weight_decay:
   0
 adjust_lr:
