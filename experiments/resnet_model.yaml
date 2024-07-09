@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/resnet_model/50_0.0005
+  results/resnet_model/101_0.0005
 distributed:
   backend: gloo
   address: localhost
@@ -13,7 +13,7 @@ wandb:
   project:
     ias-vn
   name:
-    resnet50_lr0.0005
+    resnet101_lr0.0005
 
 # Data
 Data:
@@ -41,7 +41,7 @@ model:
 lbp_in_model:
   True
 backbone:
-  resnet50
+  resnet101
 regressor:
   - 2048
   - 256
