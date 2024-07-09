@@ -32,13 +32,13 @@ Data:
     width:
       224
   batch_size:
-    32
+    128
   num_workers:
     8
 
 # Architecture
 model:
-  lbp_model
+  resnet_model
 lbp_in_model:
   True
 backbone:
