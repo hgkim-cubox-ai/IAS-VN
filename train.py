@@ -107,7 +107,7 @@ def train(cfg, rank, dataloader_dict, model, optimizer, loss_fn_dict):
         is_best = cur_acc > max_acc
         max_acc = max(cur_acc, max_acc)
         
-        if rank == 0:
+        if cfg['mode'] == 'train' and rank == 0:
             for data_split, acc in acc_dict.items():
                 wandb.log(
                     {

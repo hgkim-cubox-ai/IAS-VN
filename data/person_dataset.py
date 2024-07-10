@@ -41,7 +41,7 @@ class PersonData(Dataset):
                 transforms.Normalize(mean=0.5, std=0.5)
             ])
         for dataset in dataset_list:
-            paths = glob(os.path.join(cfg['data_path'], dataset, '*/*_0.*'))
+            paths = glob(os.path.join(cfg['data_path'], dataset, '*/*.*'))
             self.img_paths += [i for i in paths if is_image_file(i)]
         self.json_paths = [os.path.splitext(i)[0]+'.json' for i in self.img_paths]            
         
@@ -90,12 +90,12 @@ if __name__ == '__main__':
             'size': {'height': 144, 'width': 224},
             'datasets': {
                 'train': [
-                    # 'TNGo_new',
-                    # 'TNGo_new2',
+                    'TNGo_new',
+                    'TNGo_new2',
                     # 'TNGo_new3',
-                    'TNG_Employee'
+                    # 'TNG_Employee'
                 ],
-                'test': ['TNG_Employee']
+                'test': ['TNGo_new3']
             }
         },
         False

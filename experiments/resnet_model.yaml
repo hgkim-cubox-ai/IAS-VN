@@ -13,7 +13,7 @@ wandb:
   project:
     ias-vn
   name:
-    D2_resnet50_lr0.0005
+    D3_resnet50_lr0.0005
 
 # Data
 Data:
