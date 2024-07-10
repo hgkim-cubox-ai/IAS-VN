@@ -4,8 +4,8 @@ import torch
 from tqdm import tqdm
 
 from utils import (save_checkpoint, send_data_dict_to_device,
-                   calculate_accuracy, AverageMeter,
-                   AccuracyMeter)
+                   calculate_accuracy, calculate_type_accuracy,
+                   AverageMeter, AccuracyMeter)
 
 
 def _train(cfg, rank, loader, model, optimizer, loss_fn_dict, epoch):
@@ -33,6 +33,7 @@ def _train(cfg, rank, loader, model, optimizer, loss_fn_dict, epoch):
         
         acc_dict = calculate_accuracy(pred.detach(), label.view(-1,1),
                                       cfg['threshold'])
+        # calculate_type_accuracy(pred.detach(), label.detach(), input_dict['type'])
         
         loss_meter.update(loss.item(), batch_size)
         acc_meter.update(acc_dict)

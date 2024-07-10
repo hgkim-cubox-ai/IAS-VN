@@ -16,13 +16,6 @@ from idcard import align_idcard
 
 class PersonData(Dataset):
     def __init__(self, cfg, is_train: bool = True):
-        self.label_dict = {
-            'Real': 0,
-            'Laptop': 1,
-            'Monitor': 2,
-            'Paper': 3,
-            'SmartPhone': 4
-        }
         self.cfg = cfg 
         self.img_paths = []
         if is_train:
@@ -63,11 +56,26 @@ class PersonData(Dataset):
         return img, annots
         
     def preprocess_input(self, img, annots):
+        spoof_type_dict = {
+            # 'Real': 0,
+            'Laptop': 1,
+            'Monitor': 2,
+            'Paper': 3,
+            'SmartPhone': 4
+        }
+        data_dict = {}
         img = img[:, :, ::-1].copy()    # BGR to RGB
         img = align_idcard(img, annots['keypoints'])
         img = self.transform(img)
-        label = 1.0 if annots['spoof_label'] == 'Real' else 0.0
-        return {'input': img, 'label': torch.tensor(label).float()}
+        if annots['spoof_label'] == 'Real':
+            label = 1.0
+            data_dict['type'] = 0
+        else:
+            label= 0.0
+            data_dict['type'] = spoof_type_dict[annots['spoof_type']]
+        data_dict['input'] = img
+        data_dict['label'] = torch.tensor(label).float()
+        return data_dict
         
     
     def __getitem__(self, idx):
@@ -93,7 +101,7 @@ if __name__ == '__main__':
         False
     )
     from torch.utils.data import DataLoader
-    loader = DataLoader(dataset, 1, True)
+    loader = DataLoader(dataset, 3, True)
     
     for i, (input_dict) in enumerate(loader):
         # print(input_dict['input'].size(), input_dict['label'])

@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/resnet_model/D2_50_0.0005
+  results/resnet_model/D3_50_0.0005
 distributed:
   backend: gloo
   address: localhost
@@ -24,8 +24,7 @@ Data:
       - TNGo_new
       - TNGo_new2
     test:
-      - TNGo_new3
-      - TNG_Employee
+      - TNgo_new3
   size:
     height:
       144
