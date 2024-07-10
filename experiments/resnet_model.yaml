@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/resnet_model/50_0.001
+  results/resnet_model/D2_50_0.005
 distributed:
   backend: gloo
   address: localhost
@@ -13,7 +13,7 @@ wandb:
   project:
     ias-vn
   name:
-    resnet50_lr0.001
+    D2_resnet50_lr0.005
 
 # Data
 Data:
@@ -23,8 +23,8 @@ Data:
     train:
       - TNGo_new
       - TNGo_new2
-      - TNGo_new3
     test:
+      - TNGo_new3
       - TNG_Employee
   size:
     height:
@@ -58,7 +58,7 @@ loss_functions:
 optimizer:
   adam
 base_lr:
-  0.001
+  0.005
 weight_decay:
   0
 adjust_lr:
