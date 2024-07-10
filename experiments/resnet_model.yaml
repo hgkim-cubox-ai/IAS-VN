@@ -6,7 +6,7 @@ seed:
 save_path:
   results/resnet_model/D3_50_0.0005
 distributed:
-  backend: gloo
+  backend: nccl
   address: localhost
   port: 12345
 wandb:
