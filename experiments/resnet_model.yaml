@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/resnet_model/D3_50_0.0005
+  results/resnet_model/D4_50_0.0005
 distributed:
   backend: nccl
   address: localhost
@@ -13,7 +13,7 @@ wandb:
   project:
     ias-vn
   name:
-    D3_resnet50_lr0.0005
+    D4_resnet50_lr0.0005
 
 # Data
 Data:
@@ -23,6 +23,7 @@ Data:
     train:
       - TNGo_new
       - TNGo_new2
+      - TNG_Employee
     test:
       - TNGo_new3
   size:
