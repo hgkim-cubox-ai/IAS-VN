@@ -44,7 +44,9 @@ def _train(cfg, rank, loader, model, optimizer, loss_fn_dict, epoch):
             fake=acc_meter.dict['fake']['acc']
         )
     
-    return acc_meter.dict['real']['acc'], acc_meter.dict['fake']['acc']
+    return acc_meter.dict['total']['acc'], \
+           acc_meter.dict['real']['acc'], \
+           acc_meter.dict['fake']['acc']
 
 
 def _validate(cfg, rank, loader, model, loss_fn_dict, epoch, data_split):
@@ -79,7 +81,9 @@ def _validate(cfg, rank, loader, model, loss_fn_dict, epoch, data_split):
             fake=acc_meter.dict['fake']['acc']
         )
     
-    return acc_meter.dict['real']['acc'], acc_meter.dict['fake']['acc']
+    return acc_meter.dict['total']['acc'], \
+           acc_meter.dict['real']['acc'], \
+           acc_meter.dict['fake']['acc']
             
 
 def train(cfg, rank, dataloader_dict, model, optimizer, loss_fn_dict):
@@ -111,8 +115,9 @@ def train(cfg, rank, dataloader_dict, model, optimizer, loss_fn_dict):
             for data_split, acc in acc_dict.items():
                 wandb.log(
                     {
-                        f'{data_split} real': acc[0],
-                        f'{data_split} fake': acc[1]
+                        f'{data_split} acc': acc[0],
+                        f'{data_split} real': acc[1],
+                        f'{data_split} fake': acc[2]
                     },
                     step=epoch+1
                 )

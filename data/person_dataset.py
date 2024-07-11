@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
 '''
 TNG_Employee:   74명,  6746 images
-TNGo_new:       362명, 3630 images
+TNGo_new:       363명, 3630 images
 TNGo_new2:      431명, 4310 images
 TNGo_new3:      320명, 3200 images
 '''
