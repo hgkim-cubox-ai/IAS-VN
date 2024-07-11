@@ -178,6 +178,32 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
+class ACCMeter(object):
+    def __init__(self, name):
+        self.name = name
+        self.reset()
+    
+    def reset(self):
+        self.num = 1e-8 # avoid zero division in early batch
+        self.correct = 0
+        self.acc = 0
+    
+    def update(self, acc_list):
+        # acc_list: [num, correct] in mini-batch
+        self.num += acc_list[0]
+        self.correct += acc_list[1]
+        self.acc = self.correct / self.num * 100
+
+
+class ACMeter(object):
+    def __init__(self):
+        self.total_meter = ACCMeter('total')
+        self.real_meter = ACCMeter('real')
+        self.fake_meter = ACCMeter('fake')
+    
+    
+
+
 class AccuracyMeter(object):
     def __init__(self):
         self.reset()
