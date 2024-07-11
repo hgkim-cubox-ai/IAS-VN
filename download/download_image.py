@@ -144,6 +144,31 @@ def TNGo_new234(service, dataset_dir, id):
     return file_dict
 
 
+def eKYC_Dataset(service, dataset_dir, id):
+    file_dict = {}
+    
+    idcard_list = sorted(list_up(service, id, False), key=lambda x: x['name'])
+    for idcard in idcard_list:
+        idcard_id = idcard['id']
+        idcard_name = idcard['name']
+        
+        idcard_dir = os.path.join(dataset_dir, idcard_name)
+        os.makedirs(idcard_dir, exist_ok=True)
+        
+        file_list = sorted(list_up(service, idcard_id, True), key=lambda x: x['name'])
+        for file in file_list:
+            file_id = file['id']
+            file_name = file['name']
+            save_path = os.path.join(idcard_dir, file_name)
+            
+            file_dict[file_id] = [
+                f'{idcard_name}/{file_name}',
+                save_path
+            ]
+
+    return file_dict
+
+
 def main():
     # Set service
     token_path = 'download/token.json'
@@ -155,9 +180,9 @@ def main():
     os.makedirs(root_dir, exist_ok=True)
     
     dataset_dict = {
-        'TNG_Employee': {
-            'fn': TNG_Employee, 'id': '1aXqx-bYC-Z3aPwtcrSH1g1maAVCKUvPP'
-        },
+        # 'TNG_Employee': {
+        #     'fn': TNG_Employee, 'id': '1aXqx-bYC-Z3aPwtcrSH1g1maAVCKUvPP'
+        # },
         # 'TNGo_new': {
         #     'fn': TNGo_new, 'id': '1j-PkGIExdAd7t8iI2MAYRz1R4ySQHDRI'
         # },
@@ -169,7 +194,10 @@ def main():
         # },
         # 'TNGo_new4': {
         #     'fn': TNGo_new234, 'id': '1uDtPgXSPkFWcKP-X2OVLtbTSasL7wGNJ'
-        # }
+        # },
+        'eKYC_Dataset': {
+            'fn': eKYC_Dataset, 'id': '1IGcOuukpqbTpQmlByQi-jbSYC44ZbQh8'
+        }
     }
     
     for dataset_name, info in dataset_dict.items():

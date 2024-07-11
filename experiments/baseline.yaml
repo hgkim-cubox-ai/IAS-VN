@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/resnet_model/D4_50_0.0005
+  results/baseline/18_0.005
 distributed:
   backend: nccl
   address: localhost
@@ -13,7 +13,7 @@ wandb:
   project:
     ias-vn
   name:
-    D4_resnet50_lr0.0005
+    baseline_18_0.005
 
 # Data
 Data:
@@ -23,7 +23,6 @@ Data:
     train:
       - TNGo_new
       - TNGo_new2
-      - TNG_Employee
     test:
       - TNGo_new3
   size:
@@ -32,9 +31,9 @@ Data:
     width:
       224
   batch_size:
-    256
+    1024
   num_workers:
-    8
+    64
 
 # Architecture
 model:
@@ -42,7 +41,7 @@ model:
 lbp_in_model:
   True
 backbone:
-  resnet50
+  resnet18
 regressor:
   - 2048
   - 256
@@ -58,7 +57,7 @@ loss_functions:
 optimizer:
   adam
 base_lr:
-  0.0005
+  0.005
 weight_decay:
   0
 adjust_lr:
