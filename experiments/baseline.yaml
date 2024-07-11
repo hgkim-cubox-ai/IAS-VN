@@ -43,7 +43,6 @@ lbp_in_model:
 backbone:
   resnet18
 regressor:
-  - 2048
   - 256
   - 16
   - 1
