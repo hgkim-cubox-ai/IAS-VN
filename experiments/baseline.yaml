@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/baseline/34_0.01
+  results/baseline/34_0.005
 distributed:
   backend: nccl
   address: localhost
@@ -13,7 +13,7 @@ wandb:
   project:
     ias-vn
   name:
-    baseline_34_0.01
+    baseline_34_0.005
 
 # Data
 Data:
@@ -56,7 +56,7 @@ loss_functions:
 optimizer:
   adam
 base_lr:
-  0.01
+  0.005
 weight_decay:
   0
 adjust_lr:
