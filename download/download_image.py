@@ -144,7 +144,7 @@ def TNGo_new234(service, dataset_dir, id):
     return file_dict
 
 
-def eKYC_Dataset(service, dataset_dir, id):
+def Integration_Test(service, dataset_dir, id):
     file_dict = {}
     
     idcard_list = sorted(list_up(service, id, False), key=lambda x: x['name'])
@@ -195,8 +195,8 @@ def main():
         # 'TNGo_new4': {
         #     'fn': TNGo_new234, 'id': '1uDtPgXSPkFWcKP-X2OVLtbTSasL7wGNJ'
         # },
-        'eKYC_Dataset': {
-            'fn': eKYC_Dataset, 'id': '1IGcOuukpqbTpQmlByQi-jbSYC44ZbQh8'
+        'Integration_Test': {
+            'fn': Integration_Test, 'id': '1XKA66_zuQ_S_LqoraliMyjHmzGNxWEWQ'
         }
     }
     
