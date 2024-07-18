@@ -32,7 +32,7 @@ class PersonData(Dataset):
             ])
             dataset_list = cfg['datasets']['train']
         else:
-            dataset_list = cfg['datasets']['test']
+            dataset_list = cfg['datasets']['val']
             self.transform = transforms.Compose([
                 transforms.ToTensor(),
                 transforms.Resize(
