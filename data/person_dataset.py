@@ -12,6 +12,7 @@ from torchvision import transforms
 
 from utils import is_image_file
 from idcard import align_idcard
+from types_ import SPOOF_TYPE_DICT
 
 
 class PersonData(Dataset):
@@ -41,46 +42,47 @@ class PersonData(Dataset):
                 transforms.Normalize(mean=0.5, std=0.5)
             ])
         for dataset in dataset_list:
-            paths = glob(os.path.join(cfg['data_path'], dataset, '*/*_0.*'))
+            paths = glob(os.path.join(cfg['data_path'], dataset, '*/*.*'))
             self.img_paths += [i for i in paths if is_image_file(i)]
         self.json_paths = [os.path.splitext(i)[0]+'.json' for i in self.img_paths]            
         
     def __len__(self):
         return len(self.img_paths)
     
-    def read_data(self, idx):
-        img = np.fromfile(self.img_paths[idx], np.uint8)
+    def read_data(self, img_path, json_path):
+        img = np.fromfile(img_path, np.uint8)
         img = cv2.imdecode(img, cv2.IMREAD_COLOR)
-        with open(self.json_paths[idx], 'r', encoding='utf-8') as f:
+        with open(json_path, 'r', encoding='utf-8') as f:
             annots = json.load(f)
         return img, annots
         
     def preprocess_input(self, img, annots):
-        spoof_type_dict = {
-            # 'Real': 0,
-            'Laptop': 1,
-            'Monitor': 2,
-            'Paper': 3,
-            'SmartPhone': 4
-        }
         data_dict = {}
         img = img[:, :, ::-1].copy()    # BGR to RGB
         img = align_idcard(img, annots['keypoints'])
         img = self.transform(img)
         if annots['spoof_label'] == 'Real':
             label = 1.0
-            data_dict['type'] = 0
+            data_dict['spoof_type'] = 0
         else:
-            label= 0.0
-            data_dict['type'] = spoof_type_dict[annots['spoof_type']]
+            label = 0.0
+            data_dict['spoof_type'] = SPOOF_TYPE_DICT[annots['spoof_type']]
         data_dict['input'] = img
         data_dict['label'] = torch.tensor(label).float()
         return data_dict
         
     
     def __getitem__(self, idx):
-        img, annots = self.read_data(idx)
-        return self.preprocess_input(img, annots)
+        img_path = self.img_paths[idx]
+        json_path = self.json_paths[idx]
+        
+        img, annots = self.read_data(img_path, json_path)
+        data_dict = self.preprocess_input(img, annots)
+        
+        data_dict['img_path'] = img_path
+        data_dict['json_path'] = json_path
+        
+        return data_dict
 
 
 if __name__ == '__main__':

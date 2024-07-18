@@ -12,9 +12,10 @@ import torch
 from torch.utils.data import DataLoader
 
 from data import PersonData
-from models import LBPModel
+from models import LBPModel, ResNetModel
 from utils import is_image_file
 from idcard import align_idcard
+from types_ import SPOOF_TYPE_DICT
 
 
 def infer_pth():
@@ -26,7 +27,7 @@ def infer_pth():
             'data_path': 'C:/Users/heegyoon/Desktop/data/IAS/vn/dataset',
             'size': {'height': 144, 'width': 224},
             'datasets': {
-                'test': ['TNG_Employee']
+                'test': ['TNGo_new3']
             }
         },
         is_train=False
@@ -34,16 +35,15 @@ def infer_pth():
     loader = DataLoader(dataset, 1, False)
     
     # Model
-    model = LBPModel(
+    model = ResNetModel(
         {
             'backbone': 'resnet50',
-            'regressor': [2048, 256, 16, 1],
-            'Data': {'batch_size': 1}
+            'regressor': [256, 16, 1],
         }
     )
     model = model.to(device)
     # Load weights
-    tmp = torch.load('models/ias_model.pth')['state_dict']
+    tmp = torch.load('models/trained/baseline_res50_lr0.001_epoch51.pth')['state_dict']
     state_dict = OrderedDict()
     for n, v in tmp.items():
         state_dict[n[7:]] = v
@@ -51,41 +51,60 @@ def infer_pth():
     model.eval()
     
     # Thresholds
-    ths = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50,
-           0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95]
+    ths = [0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    
+    v2k_dict = {0: 'Real', 1: 'Laptop', 2: 'Monitor', 3: 'Paper', 4: 'SmartPhone'}
     
     for th in ths:
-        results_dict = {
-            0: {'len': 0, 'correct': 0},    # fake
-            1: {'len': 0, 'correct': 0}     # real
-        }
-        
-        for i, input_dict in enumerate(tqdm(loader, desc=f'{th}')):
-            img = input_dict['input'].to(device)
-            label = input_dict['label']
-            results_dict[int(label.item())]['len'] += 1
-            
-            with torch.no_grad():
-                pred = model(img)
-            pred = torch.where(pred > th, 1, 0).cpu()
-            
-            if pred.item() == label.item():
-                results_dict[int(label.item())]['correct'] += 1
-        
-        # Calculate accuracy    
-        real_acc = (results_dict[1]['correct'] / results_dict[1]['len']) * 100
-        fake_acc = (results_dict[0]['correct'] / results_dict[0]['len']) * 100
-        print(results_dict)
-        
-        # Save log
         log = []
         log.append(f'Threshold: {th}\n')
-        log.append(f'real: {real_acc:.3f}\tfake: {fake_acc:.3f}\n\n')
-        log_name = 'demo_results2.txt'
-        mode = 'a' if os.path.exists(log_name) else 'w'
-        with open(log_name, mode, encoding='utf-8') as f:
+        results_dict = {}
+        for key, value in SPOOF_TYPE_DICT.items():
+            results_dict[key] = {
+                'value': value,
+                'len': 0,
+                'correct': 0
+            }
+        
+        for i, input_dict in enumerate(tqdm(loader, desc=f'Threshold: {th}')):
+            img = input_dict['input'].to(device)
+            label = input_dict['label'].item()
+            spoof_type = v2k_dict[input_dict['spoof_type'].item()]
+            results_dict[spoof_type]['len'] += 1
+            
+            # Infer
+            with torch.no_grad():
+                pred = model(img)
+            if pred.item() > th:
+                pred = 1.0
+            else:
+                pred = 0.0
+            
+            if pred == label:
+                results_dict[spoof_type]['correct'] += 1
+        
+        # Calculate real/fake accuracy
+        real_acc = (results_dict['Real']['correct'] / results_dict['Real']['len']) * 100
+        fake_len = results_dict['Laptop']['len'] + results_dict['Monitor']['len'] + \
+                   results_dict['Paper']['len'] + results_dict['SmartPhone']['len']
+        fake_correct = results_dict['Laptop']['correct'] + results_dict['Monitor']['correct'] + \
+                       results_dict['Paper']['correct'] + results_dict['SmartPhone']['correct']
+        fake_acc = (fake_correct / fake_len) * 100
+        log.append(f'real: {real_acc:.3f}\tfake: {fake_acc:.3f}\n')
+        
+        # Calculate spoof type accuracy
+        for spoof_type, d in results_dict.items():
+            l = d['len']; c = d['correct']
+            acc = (c / l) * 100
+            log.append(f'[{spoof_type}] acc: {acc:.3f}\n')
+        
+        print(results_dict)
+        log_fname = 'infer_results.txt'
+        mode = 'a' if os.path.exists(log_fname) else 'w'
+        with open(log_fname, mode, encoding='utf-8') as f:
             f.writelines(log)
-
+            f.write('\n')
+            
 
 def infer_onnx():
     so = ort.SessionOptions()
@@ -151,5 +170,5 @@ def infer_onnx():
 
 
 if __name__ == '__main__':
-    infer_onnx()
+    infer_pth()
     print('Done')

@@ -88,6 +88,8 @@ def send_data_dict_to_device(
         if isinstance(v, torch.Tensor):
             data[k] = v.detach().to(rank)
         elif isinstance(v, list):
+            if isinstance(v[0], str):
+                continue
             data_list = []
             for i in range(len(v)):
                 data_list.append(v[i].detach().to(rank))
@@ -122,7 +124,7 @@ def load_state_dict(path):
     return state_dict
 
 
-def calculate_accuracy(pred, label, th=0.5):
+def calculate_accuracy(pred, label, th=0.3):
     acc_dict = {'total': {}, 'real':{}, 'fake': {}}
     
     pred = torch.where(pred > th, 1.0, 0.0).view(-1)
