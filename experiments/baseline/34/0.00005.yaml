@@ -53,7 +53,7 @@ regressor:
 num_epochs:
   100
 loss_functions:
-  bce:
+  ce:
     weight: 1.0
 optimizer:
   adam
