@@ -1,0 +1,70 @@
+# Setup
+mode:
+  train
+seed:
+  777
+save_path:
+  results/debugging
+distributed:
+  backend: nccl
+  address: localhost
+  port: 12345
+wandb:
+  project:
+    ias-vn
+  group:
+    ce
+  name:
+    batch_test1
+
+# Data
+Data:
+  data_path:
+    C:/Users/heegyoon/Desktop/data/IAS/vn/dataset
+  datasets:
+    train:
+      - TNGo_new
+      - TNGo_new2
+    val:
+      - TNgo_new3
+  size:
+    height:
+      144
+    width:
+      224
+  batch_size:
+    512
+  num_workers:
+    2
+
+# Architecture
+model:
+  resnet_model
+lbp_in_model:
+  True
+backbone:
+  resnet18
+regressor:
+  - 256
+  - 16
+  - 5
+
+# Train
+num_epochs:
+  20
+loss_functions:
+  ce:
+    weight: 1.0
+optimizer:
+  adam
+base_lr:
+  0.005
+weight_decay:
+  0
+adjust_lr:
+  False
+threshold:
+  0.3
+
+pretrained_model:
+  # models/ResNet50_trained_on_korean_idcrad.pth
