@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/baseline/50_0.0001
+  results/baseline/18_0.005
 distributed:
   backend: nccl
   address: localhost
@@ -15,7 +15,7 @@ wandb:
   group:
     ce
   name:
-    "50_0.0001"
+    "18_0.005"
 
 # Data
 Data:
@@ -43,7 +43,7 @@ model:
 lbp_in_model:
   True
 backbone:
-  resnet50
+  resnet18
 regressor:
   - 256
   - 16
@@ -58,7 +58,7 @@ loss_functions:
 optimizer:
   adam
 base_lr:
-  0.0001
+  0.005
 weight_decay:
   0
 adjust_lr:

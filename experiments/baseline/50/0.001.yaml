@@ -12,8 +12,10 @@ distributed:
 wandb:
   project:
     ias-vn
+  group:
+    ce
   name:
-    baseline_50_0.001
+    "50_0.001"
 
 # Data
 Data:
@@ -23,7 +25,7 @@ Data:
     train:
       - TNGo_new
       - TNGo_new2
-    test:
+    val:
       - TNGo_new3
   size:
     height:
@@ -31,7 +33,7 @@ Data:
     width:
       224
   batch_size:
-    1024
+    512
   num_workers:
     64
 
@@ -45,7 +47,7 @@ backbone:
 regressor:
   - 256
   - 16
-  - 1
+  - 5
 
 # Train
 num_epochs:

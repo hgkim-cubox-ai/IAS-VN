@@ -20,7 +20,7 @@ class ResNetModel(nn.Module):
         for i in range(len(self.cfg['regressor'])-1):
             regressor.append(nn.ReLU(inplace=True))
             regressor.append(nn.Linear(self.cfg['regressor'][i],self.cfg['regressor'][i+1]))
-        regressor.append(nn.Sigmoid())
+        # regressor.append(nn.Sigmoid())
         self.regressor = nn.Sequential(*regressor)
     
     def forward(self, img):

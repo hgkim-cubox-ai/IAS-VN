@@ -13,18 +13,24 @@ def _train(cfg, rank, loader, model, optimizer, loss_fn_dict, epoch):
     
     loss_meter = AverageMeter()
     acc_meter = AccuracyMeter()
-    loss_fn = loss_fn_dict['bce']['fn']
+    loss_fn = loss_fn_dict['ce']['fn']
     pbar = tqdm(loader, desc=f'[Train] Epoch {epoch+1}',
                 ncols=150, unit='batch', disable=rank)
     
     for _, input_dict in enumerate(pbar):    
         batch_size = input_dict['input'].size(0)
         input_dict = send_data_dict_to_device(input_dict, rank)
+        label = input_dict['label']
+        spoof_type = input_dict['spoof_type']
         
         pred = model(input_dict['input'])
-        label = input_dict['label']
         
-        loss = loss_fn(pred, label.view(-1,1))
+        if isinstance(loss_fn, torch.nn.BCELoss):
+            loss = loss_fn(pred, label.view(-1,1))
+        elif isinstance(loss_fn, torch.nn.CrossEntropyLoss):
+            loss = loss_fn(pred, spoof_type)
+        else:
+            loss = None
                                 
         # Backward
         optimizer.zero_grad()
@@ -44,9 +50,13 @@ def _train(cfg, rank, loader, model, optimizer, loss_fn_dict, epoch):
             fake=acc_meter.dict['fake']['acc']
         )
     
-    return acc_meter.dict['total']['acc'], \
-           acc_meter.dict['real']['acc'], \
-           acc_meter.dict['fake']['acc']
+    ret = []
+    ret.append(acc_meter.dict['total']['acc'])
+    ret.append(acc_meter.dict['real']['acc'])
+    ret.append(acc_meter.dict['fake']['acc'])
+    ret.append(loss_meter.avg)
+    
+    return ret
 
 
 def _validate(cfg, rank, loader, model, loss_fn_dict, epoch, data_split):
@@ -54,20 +64,26 @@ def _validate(cfg, rank, loader, model, loss_fn_dict, epoch, data_split):
     
     loss_meter = AverageMeter()
     acc_meter = AccuracyMeter()
-    loss_fn = loss_fn_dict['bce']['fn']
+    loss_fn = loss_fn_dict['ce']['fn']
     pbar = tqdm(loader, desc=f'[{data_split}] Epoch {epoch+1}',
                 ncols=150, unit='batch', disable=rank)
     
     for i, input_dict in enumerate(pbar):
         batch_size = input_dict['input'].size(0)
         input_dict = send_data_dict_to_device(input_dict, rank)
+        label = input_dict['label']
+        spoof_type = input_dict['spoof_type']
         
         with torch.no_grad():
             pred = model(input_dict['input'])
-        label = input_dict['label']
         
-        loss = loss_fn(pred, label.view(-1,1))
-                            
+        if isinstance(loss_fn, torch.nn.BCELoss):
+            loss = loss_fn(pred, label.view(-1,1))
+        elif isinstance(loss_fn, torch.nn.CrossEntropyLoss):
+            loss = loss_fn(pred, spoof_type)
+        else:
+            loss = None
+                                        
         acc_dict = calculate_accuracy(pred.detach(), label.view(-1,1),
                                       cfg['threshold'])
         
@@ -81,9 +97,13 @@ def _validate(cfg, rank, loader, model, loss_fn_dict, epoch, data_split):
             fake=acc_meter.dict['fake']['acc']
         )
     
-    return acc_meter.dict['total']['acc'], \
-           acc_meter.dict['real']['acc'], \
-           acc_meter.dict['fake']['acc']
+    ret = []
+    ret.append(acc_meter.dict['total']['acc'])
+    ret.append(acc_meter.dict['real']['acc'])
+    ret.append(acc_meter.dict['fake']['acc'])
+    ret.append(loss_meter.avg)
+    
+    return ret
             
 
 def train(cfg, rank, dataloader_dict, model, optimizer, loss_fn_dict):
@@ -115,6 +135,7 @@ def train(cfg, rank, dataloader_dict, model, optimizer, loss_fn_dict):
             for data_split, acc in acc_dict.items():
                 wandb.log(
                     {
+                        f'{data_split} loss': acc[3],
                         f'{data_split} acc': acc[0],
                         f'{data_split} real': acc[1],
                         f'{data_split} fake': acc[2]

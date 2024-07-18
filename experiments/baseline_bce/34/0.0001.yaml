@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/baseline/50_0.0001
+  results/baseline/34_0.0001
 distributed:
   backend: nccl
   address: localhost
@@ -12,10 +12,8 @@ distributed:
 wandb:
   project:
     ias-vn
-  group:
-    ce
   name:
-    "50_0.0001"
+    baseline_34_0.0001
 
 # Data
 Data:
@@ -25,7 +23,7 @@ Data:
     train:
       - TNGo_new
       - TNGo_new2
-    val:
+    test:
       - TNGo_new3
   size:
     height:
@@ -33,7 +31,7 @@ Data:
     width:
       224
   batch_size:
-    512
+    1024
   num_workers:
     64
 
@@ -43,11 +41,11 @@ model:
 lbp_in_model:
   True
 backbone:
-  resnet50
+  resnet34
 regressor:
   - 256
   - 16
-  - 5
+  - 1
 
 # Train
 num_epochs:

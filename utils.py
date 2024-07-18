@@ -61,9 +61,11 @@ def setup(cfg: Dict[str, Any]) -> int:
         shutil.copy(cfg['cfg'], os.path.join(cfg['save_path'],cfg['cfg'].split('/')[1]))
         wandb.init(
             project=cfg['wandb']['project'],
+            group=cfg['wandb']['group'],
             name=cfg['wandb']['name'],
             config={
-                'learning_rate': cfg['base_lr']
+                'learning_rate': cfg['base_lr'],
+                'baseline': cfg['backbone'][6:]
             }
         )
     
