@@ -33,7 +33,7 @@ Data:
     width:
       224
   batch_size:
-    512
+    256
   num_workers:
     64
 
