@@ -20,7 +20,7 @@ wandb:
 # Data
 Data:
   data_path:
-    C:/Users/heegyoon/Desktop/data/IAS/vn/dataset
+    /purestorage/datasets/IAS/vn/dataset
   datasets:
     train:
       - TNGo_new
@@ -35,7 +35,7 @@ Data:
   batch_size:
     512
   num_workers:
-    2
+    64
 
 # Architecture
 model:

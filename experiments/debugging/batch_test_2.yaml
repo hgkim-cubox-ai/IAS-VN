@@ -20,7 +20,7 @@ wandb:
 # Data
 Data:
   data_path:
-    C:/Users/heegyoon/Desktop/data/IAS/vn/dataset
+    /purestorage/datasets/IAS/vn/dataset
   datasets:
     train:
       - TNGo_new
