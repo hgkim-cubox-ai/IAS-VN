@@ -11,6 +11,8 @@ from utils import (save_checkpoint, send_data_dict_to_device,
 def _train(cfg, rank, loader, model, optimizer, loss_fn_dict, epoch):
     model.train()
     
+    total = 0
+    correct = 0
     loss_meter = AverageMeter()
     acc_meter = AccuracyMeter()
     loss_fn = loss_fn_dict['ce']['fn']
@@ -39,6 +41,8 @@ def _train(cfg, rank, loader, model, optimizer, loss_fn_dict, epoch):
         
         pred_cls = torch.max(pred.detach(), 1)[1]
         pred_label = torch.where(pred_cls > 0, 0.0, 1.0)
+        total += batch_size
+        correct += (pred_cls == spoof_type).sum().item()
         
         acc_dict = calculate_accuracy(pred_label, label.view(-1,1),
                                       cfg['threshold'])
@@ -48,7 +52,8 @@ def _train(cfg, rank, loader, model, optimizer, loss_fn_dict, epoch):
                 
         pbar.set_postfix(
             loss=loss_meter.avg,
-            acc=acc_meter.dict['total']['acc'],
+            type_acc=(correct / total * 100),
+            label_acc=acc_meter.dict['total']['acc'],
             real=acc_meter.dict['real']['acc'],
             fake=acc_meter.dict['fake']['acc']
         )
@@ -57,6 +62,7 @@ def _train(cfg, rank, loader, model, optimizer, loss_fn_dict, epoch):
     ret.append(acc_meter.dict['total']['acc'])
     ret.append(acc_meter.dict['real']['acc'])
     ret.append(acc_meter.dict['fake']['acc'])
+    ret.append(correct / total * 100)
     ret.append(loss_meter.avg)
     
     return ret
@@ -65,6 +71,8 @@ def _train(cfg, rank, loader, model, optimizer, loss_fn_dict, epoch):
 def _validate(cfg, rank, loader, model, loss_fn_dict, epoch, data_split):
     model.eval()
     
+    total = 0
+    correct = 0
     loss_meter = AverageMeter()
     acc_meter = AccuracyMeter()
     loss_fn = loss_fn_dict['ce']['fn']
@@ -89,6 +97,8 @@ def _validate(cfg, rank, loader, model, loss_fn_dict, epoch, data_split):
         
         pred_cls = torch.max(pred.detach(), 1)[1]
         pred_label = torch.where(pred_cls > 0, 0.0, 1.0)
+        total += batch_size
+        correct += (pred_cls == spoof_type).sum().item()
         
         acc_dict = calculate_accuracy(pred_label, label.view(-1,1),
                                       cfg['threshold'])
@@ -98,6 +108,7 @@ def _validate(cfg, rank, loader, model, loss_fn_dict, epoch, data_split):
                 
         pbar.set_postfix(
             loss=loss_meter.avg,
+            type_acc=(correct / total * 100),
             acc=acc_meter.dict['total']['acc'],
             real=acc_meter.dict['real']['acc'],
             fake=acc_meter.dict['fake']['acc']
@@ -107,6 +118,7 @@ def _validate(cfg, rank, loader, model, loss_fn_dict, epoch, data_split):
     ret.append(acc_meter.dict['total']['acc'])
     ret.append(acc_meter.dict['real']['acc'])
     ret.append(acc_meter.dict['fake']['acc'])
+    ret.append(correct / total * 100)
     ret.append(loss_meter.avg)
     
     return ret
@@ -141,8 +153,9 @@ def train(cfg, rank, dataloader_dict, model, optimizer, loss_fn_dict):
             for data_split, acc in acc_dict.items():
                 wandb.log(
                     {
-                        f'{data_split} loss': acc[3],
-                        f'{data_split} acc': acc[0],
+                        f'{data_split} loss': acc[4],
+                        f'{data_split} type_acc': acc[3],
+                        f'{data_split} label_acc': acc[0],
                         f'{data_split} real': acc[1],
                         f'{data_split} fake': acc[2]
                     },
