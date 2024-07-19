@@ -1,12 +1,12 @@
 # Setup
 mode:
-  debugging
+  train
 seed:
   777
 save_path:
-  results/debugging
+  results/baseline/101_0.00001
 distributed:
-  backend: gloo
+  backend: nccl
   address: localhost
   port: 12345
 wandb:
@@ -15,12 +15,12 @@ wandb:
   group:
     ce
   name:
-    debugging
+    "101_0.00001"
 
 # Data
 Data:
   data_path:
-    C:/Users/heegyoon/Desktop/data/IAS/vn/dataset
+    /purestorage/datasets/IAS/vn/dataset
   datasets:
     train:
       - TNGo_new
@@ -33,9 +33,9 @@ Data:
     width:
       224
   batch_size:
-    7
+    256
   num_workers:
-    2
+    64
 
 # Architecture
 model:
@@ -43,7 +43,7 @@ model:
 lbp_in_model:
   True
 backbone:
-  resnet18
+  resnet101
 regressor:
   - 256
   - 16
@@ -51,14 +51,14 @@ regressor:
 
 # Train
 num_epochs:
-  20
+  100
 loss_functions:
   ce:
     weight: 1.0
 optimizer:
   adam
 base_lr:
-  0.005
+  0.00001
 weight_decay:
   0
 adjust_lr:
@@ -67,4 +67,4 @@ threshold:
   0.3
 
 pretrained_model:
-  # models/ResNet50_trained_on_korean_idcrad.pth
+  
