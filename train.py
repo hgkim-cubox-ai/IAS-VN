@@ -109,7 +109,7 @@ def _validate(cfg, rank, loader, model, loss_fn_dict, epoch, data_split):
         pbar.set_postfix(
             loss=loss_meter.avg,
             type_acc=(correct / total * 100),
-            acc=acc_meter.dict['total']['acc'],
+            label_acc=acc_meter.dict['total']['acc'],
             real=acc_meter.dict['real']['acc'],
             fake=acc_meter.dict['fake']['acc']
         )
