@@ -38,7 +38,7 @@ def load_dataloader_dict(cfg: Dict[str, Any]) -> Dict[str, DataLoader]:
         
         dataloader_dict[data_split] = DataLoader(
             dataset=dataset, batch_size=cfg['Data']['batch_size'],
-            num_workers=cfg['Data']['num_workers'], pin_memory=True,
+            num_workers=cfg['num_workers'], pin_memory=True,
             sampler=sampler
         )
     

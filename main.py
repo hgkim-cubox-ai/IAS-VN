@@ -12,11 +12,13 @@ from types_ import *
 def parse_args() -> Dict[str, Any]:
     parser = argparse.ArgumentParser()
     parser.add_argument('--cfg', type=str, default='experiments/debugging/debugging.yaml')
+    parser.add_argument('--num_workers', type=int, default=32)
     args = parser.parse_args()
     
     with open(args.cfg, 'r') as f:
         cfg = yaml.safe_load(f)
         cfg['cfg'] = args.cfg
+        cfg['num_workers'] = args.num_workers
     
     return cfg
 
