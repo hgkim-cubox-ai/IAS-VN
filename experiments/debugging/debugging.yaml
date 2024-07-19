@@ -1,6 +1,6 @@
 # Setup
 mode:
-  train
+  debugging
 seed:
   777
 save_path:
@@ -33,7 +33,7 @@ Data:
     width:
       224
   batch_size:
-    32
+    7
   num_workers:
     2
 

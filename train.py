@@ -37,7 +37,10 @@ def _train(cfg, rank, loader, model, optimizer, loss_fn_dict, epoch):
         loss.backward()
         optimizer.step()
         
-        acc_dict = calculate_accuracy(pred.detach(), label.view(-1,1),
+        pred_cls = torch.max(pred.detach(), 1)[1]
+        pred_label = torch.where(pred_cls > 0, 0.0, 1.0)
+        
+        acc_dict = calculate_accuracy(pred_label, label.view(-1,1),
                                       cfg['threshold'])
         
         loss_meter.update(loss.item(), batch_size)

@@ -11,7 +11,7 @@ from types_ import *
 
 def parse_args() -> Dict[str, Any]:
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', type=str, default='experiments/debugging.yaml')
+    parser.add_argument('--cfg', type=str, default='experiments/debugging/debugging.yaml')
     args = parser.parse_args()
     
     with open(args.cfg, 'r') as f:

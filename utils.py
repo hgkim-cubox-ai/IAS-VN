@@ -129,7 +129,7 @@ def load_state_dict(path):
 def calculate_accuracy(pred, label, th=0.3):
     acc_dict = {'total': {}, 'real':{}, 'fake': {}}
     
-    pred = torch.where(pred > th, 1.0, 0.0).view(-1)
+    # pred = torch.where(pred > th, 1.0, 0.0).view(-1)
     label = label.view(-1)
     
     idx_r = (label==1).nonzero().view(-1)
