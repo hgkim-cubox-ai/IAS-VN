@@ -173,10 +173,10 @@ def infer_with_detector():
     device = torch.device('cuda:0')
     
     # Model
-    model_path = 'models/trained/baseline_ce_res50_lr0.001_epoch98.pth'
+    model_path = 'models/trained/baseline_ce_res101_lr0.001_epoch92.pth'
     model = ResNetModel(
         {
-            'backbone': 'resnet50',
+            'backbone': 'resnet101',
             'regressor': [256, 16, 5],
         }
     )
@@ -207,6 +207,9 @@ def infer_with_detector():
     # Thresholds
     ths = [0.3]
     
+    sig = torch.nn.Sigmoid()
+    ps = []
+    
     for th in ths:
         results = np.zeros([10,5], dtype=np.int32)
     
@@ -234,11 +237,11 @@ def infer_with_detector():
                             
                 if len(boxes) <= 0:
                     continue
-
+                
                 keypoints = get_keypoints(masks)
                 if keypoints is not None:
-                    img = align_idcard(img, keypoints, boxes[0][5])
-                    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                    np_img = align_idcard(img, keypoints, boxes[0][5])
+                    img = cv2.cvtColor(np_img, cv2.COLOR_BGR2RGB)
                     cls_label = cls_dict[cls_label] * 2
                     if side == 'back':
                         cls_label += 1
@@ -254,10 +257,7 @@ def infer_with_detector():
                     with torch.no_grad():
                         pred = model(img)
                     cls_pred = (torch.max(pred.detach(), 1)[1]).item()
-                    
-                    # if cls_pred == 0:
-                    #     print(pred)
-                    
+
                     # Fill results
                     results[cls_label][cls_pred] += 1
         

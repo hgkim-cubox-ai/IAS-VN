@@ -1,0 +1,70 @@
+# Setup
+mode:
+  train
+seed:
+  777
+save_path:
+  results/baseline/152_0.001
+distributed:
+  backend: nccl
+  address: localhost
+  port: 12345
+wandb:
+  project:
+    ias-vn
+  group:
+    ce
+  name:
+    "152_0.001"
+
+# Data
+Data:
+  data_path:
+    /purestorage/datasets/IAS/vn/dataset
+  datasets:
+    train:
+      - TNGo_new
+      - TNGo_new2
+    val:
+      - TNGo_new3
+  size:
+    height:
+      144
+    width:
+      224
+  batch_size:
+    256
+  num_workers:
+    64
+
+# Architecture
+model:
+  resnet_model
+lbp_in_model:
+  True
+backbone:
+  resnet152
+regressor:
+  - 256
+  - 16
+  - 5
+
+# Train
+num_epochs:
+  100
+loss_functions:
+  ce:
+    weight: 1.0
+optimizer:
+  adam
+base_lr:
+  0.001
+weight_decay:
+  0
+adjust_lr:
+  False
+threshold:
+  0.3
+
+pretrained_model:
+  
