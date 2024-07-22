@@ -196,13 +196,19 @@ def infer_with_detector():
         'paper': 3,
         'smartphone': 4
     }
-    v2k_dict = {0: 'real', 1: 'laptop', 2: 'monitor', 3: 'paper', 4: 'smartPhone'}
+    v2k_dict = {
+        0: 'R_F', 1: 'R_B',
+        2: 'L_F', 3: 'L_B',
+        4: 'M_F', 5: 'M_B',
+        6: 'P_F', 7: 'P_B',
+        8: 'S_F', 9: 'S_B'
+    }
     
     # Thresholds
     ths = [0.3]
     
     for th in ths:
-        results = np.zeros([5,5], dtype=np.int32)
+        results = np.zeros([10,5], dtype=np.int32)
     
         for idcard in tqdm(idcard_list):
             idcard_dir = os.path.join(data_dir, idcard)
@@ -233,7 +239,9 @@ def infer_with_detector():
                 if keypoints is not None:
                     img = align_idcard(img, keypoints, boxes[0][5])
                     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                    cls_label = cls_dict[cls_label]
+                    cls_label = cls_dict[cls_label] * 2
+                    if side == 'back':
+                        cls_label += 1
                     
                     img = np.transpose(img, [2,0,1])
                     img = torch.from_numpy(img)
@@ -247,6 +255,9 @@ def infer_with_detector():
                         pred = model(img)
                     cls_pred = (torch.max(pred.detach(), 1)[1]).item()
                     
+                    # if cls_pred == 0:
+                    #     print(pred)
+                    
                     # Fill results
                     results[cls_label][cls_pred] += 1
         
@@ -255,13 +266,19 @@ def infer_with_detector():
         log = []
         log.append(f'{os.path.basename(model_path)}\n')
         log.append(f'Threshold: {th}\n')
-        log.append('\tR\tL\tM\tP\tS\n')
+        log.append('\tR\tL\tM\tP\tS\tTotal\tAcc\n')
         for i in range(len(results)):
-            cls = (v2k_dict[i][0]).upper()
+            cls = v2k_dict[i]
             log.append(f'{cls}\t')
             for j in range(len(results[i])):
                 log.append(f'{results[i][j]}\t')
-            log.append('\n')
+            t = sum(results[i])
+            log.append(f'{t}\t')
+            if i < 2:
+                a = results[i][0] / t * 100
+            else:
+                a = sum(results[i][1:]) / t * 100
+            log.append(f'{a:.1f}%\n')
 
         log_fname = 'infer_integration_results.txt'
         mode = 'a' if os.path.exists(log_fname) else 'w'
