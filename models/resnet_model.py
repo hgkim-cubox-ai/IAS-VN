@@ -19,7 +19,10 @@ class ResNetModel(nn.Module):
         regressor.append(nn.Linear(fc_in, self.cfg['regressor'][0]))
         for i in range(len(self.cfg['regressor'])-1):
             regressor.append(nn.ReLU(inplace=True))
-            regressor.append(nn.Linear(self.cfg['regressor'][i],self.cfg['regressor'][i+1]))
+            regressor.append(
+                nn.Linear(self.cfg['regressor'][i],self.cfg['regressor'][i+1],
+                          bias=False)
+            )
         # regressor.append(nn.Sigmoid())
         self.regressor = nn.Sequential(*regressor)
     

@@ -41,10 +41,17 @@ def get_keypoints(masks: np.ndarray, morph_ksize=21, contour_thres=0.02, poly_th
         return None
 
 
-def align_idcard(img: np.ndarray, keypoints: np.ndarray):
+def align_idcard(img: np.ndarray, keypoints: np.ndarray, cls=None):
     if isinstance(keypoints, list):
         keypoints = np.array(keypoints)
-    idcard_ratio = np.array((86, 54))
+    
+    if cls == None:
+        idcard_ratio = np.array((86, 54))
+    elif cls >= 8:
+        idcard_ratio = np.array((640, 384))
+    else:
+        raise ValueError
+    
     dsize_factor = round(np.sqrt(cv2.contourArea(np.expand_dims(keypoints, 1))) / idcard_ratio[0])
 
     dsize = idcard_ratio * dsize_factor  # idcard size unit: mm
