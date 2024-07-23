@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/baseline/50_0.001_e300
+  results/baseline/50_0.001
 distributed:
   backend: nccl
   address: localhost
@@ -15,7 +15,7 @@ wandb:
   group:
     ce
   name:
-    "50_0.001_e300"
+    "50_0.001"
 
 # Data
 Data:

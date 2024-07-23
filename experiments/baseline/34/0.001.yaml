@@ -51,7 +51,7 @@ regressor:
 
 # Train
 num_epochs:
-  100
+  300
 loss_functions:
   ce:
     weight: 1.0

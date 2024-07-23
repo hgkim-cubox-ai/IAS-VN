@@ -136,16 +136,16 @@ def train(cfg, rank, dataloader_dict, model, optimizer, loss_fn_dict):
                      model, optimizer, loss_fn_dict, epoch)
         acc_dict['train'] = acc
         log.append(f'Epoch: {epoch+1}\n'
-                   f'[Train] real acc: {acc[0]:.3f}\tfake acc: {acc[1]:.3f}\n')
+                   f'[Train] real acc: {acc[1]:.3f}\tfake acc: {acc[2]:.3f}\n')
         
         # Val, test
         for data_split in [d for d in dataloader_dict if d != 'train']:
             acc = _validate(cfg, rank, dataloader_dict[data_split],
                             model, loss_fn_dict, epoch, data_split)
             acc_dict[data_split] = acc
-            log.append(f'[{data_split}] real acc: {acc[0]:.3f}\tfake acc: {acc[1]:.3f}\n')
+            log.append(f'[{data_split}] real acc: {acc[1]:.3f}\tfake acc: {acc[2]:.3f}\n')
 
-        cur_acc = (acc[0] + acc[1]) / 2
+        cur_acc = (acc[1] + acc[2]) / 2
         is_best = cur_acc > max_acc
         max_acc = max(cur_acc, max_acc)
         
