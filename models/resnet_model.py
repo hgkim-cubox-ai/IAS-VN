@@ -9,7 +9,7 @@ class ResNetModel(nn.Module):
         super(ResNetModel, self).__init__()
         
         self.cfg = cfg
-        self.backbone = CNN_ResNet(cfg['backbone'])
+        self.backbone = CNN_ResNet(cfg['backbone'], cfg['weights'])
         self.make_regressor()
     
     def make_regressor(self):

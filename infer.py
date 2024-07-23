@@ -161,7 +161,7 @@ def infer_with_detector():
     
     detector = YOLOv8Seg('models\\trained\\IDCard_Detection_20240403.onnx')
     data_dir = 'C:\\Users\\heegyoon\\Desktop\\data\\IAS\\vn\\raw\\Integration_Test'
-    idcard_list = os.listdir(data_dir)
+    idcard_list = sorted(os.listdir(data_dir))
     
     transform = transforms.Compose([
         transforms.ToPILImage(),
@@ -173,10 +173,10 @@ def infer_with_detector():
     device = torch.device('cuda:0')
     
     # Model
-    model_path = 'models/trained/baseline_ce_res18_lr0.001_epoch76.pth'
+    model_path = 'models/trained/baseline_ce_res34_lr0.001_epoch100.pth'
     model = ResNetModel(
         {
-            'backbone': 'resnet18',
+            'backbone': 'resnet34',
             'regressor': [256, 16, 5],
         }
     )
@@ -215,7 +215,7 @@ def infer_with_detector():
     
         for idcard in tqdm(idcard_list):
             idcard_dir = os.path.join(data_dir, idcard)
-            img_list = os.listdir(idcard_dir)
+            img_list = sorted(os.listdir(idcard_dir))
             
             for img_file in img_list:
                 fname = os.path.splitext(img_file)[0]
@@ -257,11 +257,20 @@ def infer_with_detector():
                     with torch.no_grad():
                         pred = model(img)
                     cls_pred = (torch.max(pred.detach(), 1)[1]).item()
+                    
+                    # if cls_label < 2:
+                    if cls_pred == 0:
+                        p = sig(pred.view(-1)) / torch.sum(sig(pred))
+                        p_real = p[0].item()
+                        p_fake = torch.sum(p[1:]).item()
+                        # ps.append([p_real, p_fake])
+                        ps.append(p.cpu().tolist())
 
                     # Fill results
                     results[cls_label][cls_pred] += 1
         
-        results = results.tolist()            
+        ps = np.array(ps)
+        results = results.tolist()
         
         log = []
         log.append(f'{os.path.basename(model_path)}\n')
