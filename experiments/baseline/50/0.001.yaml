@@ -4,7 +4,7 @@ mode:
 seed:
   777
 save_path:
-  results/baseline/50_0.001
+  results/baseline/50_0.001_e300
 distributed:
   backend: nccl
   address: localhost
@@ -15,7 +15,7 @@ wandb:
   group:
     ce
   name:
-    "50_0.001"
+    "50_0.001_e300"
 
 # Data
 Data:
@@ -51,7 +51,7 @@ regressor:
 
 # Train
 num_epochs:
-  100
+  300
 loss_functions:
   ce:
     weight: 1.0

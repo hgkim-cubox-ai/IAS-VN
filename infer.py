@@ -173,10 +173,10 @@ def infer_with_detector():
     device = torch.device('cuda:0')
     
     # Model
-    model_path = 'models/trained/baseline_ce_res101_lr0.001_epoch92.pth'
+    model_path = 'models/trained/baseline_ce_res18_lr0.001_epoch76.pth'
     model = ResNetModel(
         {
-            'backbone': 'resnet101',
+            'backbone': 'resnet18',
             'regressor': [256, 16, 5],
         }
     )
