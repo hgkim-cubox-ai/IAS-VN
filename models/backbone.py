@@ -3,19 +3,19 @@ import torchvision.models as models
 
 
 class CNN_ResNet(nn.Module):
-    def __init__(self, backbone, weights=None):
+    def __init__(self, backbone):
         super(CNN_ResNet, self).__init__()
         
         if backbone == 'resnet18':
-            model = models.resnet18(weights)
+            model = models.resnet18()
         elif backbone == 'resnet34':
-            model = models.resnet34(weights)
+            model = models.resnet34()
         elif backbone == 'resnet50':
-            model = models.resnet50(weights)
+            model = models.resnet50()
         elif backbone == 'resnet101':
-            model = models.resnet101(weights)
+            model = models.resnet101()
         elif backbone == 'resnet152':
-            model = models.resnet152(weights)
+            model = models.resnet152()
         else:
             raise ValueError('invalid model name')
         

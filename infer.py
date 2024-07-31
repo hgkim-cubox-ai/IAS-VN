@@ -173,10 +173,11 @@ def infer_with_detector():
     device = torch.device('cuda:0')
     
     # Model
-    model_path = 'models/trained/baseline_ce_res34_lr0.001_epoch100.pth'
+    model_path = 'models/trained/baseline_ce_res101_lr0.001_epoch163.pth'
     model = ResNetModel(
         {
-            'backbone': 'resnet34',
+            'backbone': 'resnet101',
+            'weights': None,
             'regressor': [256, 16, 5],
         }
     )
@@ -207,7 +208,7 @@ def infer_with_detector():
     # Thresholds
     ths = [0.3]
     
-    sig = torch.nn.Sigmoid()
+    softmax = torch.nn.Softmax()
     ps = []
     
     for th in ths:
@@ -259,8 +260,8 @@ def infer_with_detector():
                     cls_pred = (torch.max(pred.detach(), 1)[1]).item()
                     
                     # if cls_label < 2:
-                    if cls_pred == 0:
-                        p = sig(pred.view(-1)) / torch.sum(sig(pred))
+                    if cls_pred == 0 and cls_label < 2:
+                        p = softmax(pred.view(-1)) / torch.sum(softmax(pred))
                         p_real = p[0].item()
                         p_fake = torch.sum(p[1:]).item()
                         # ps.append([p_real, p_fake])

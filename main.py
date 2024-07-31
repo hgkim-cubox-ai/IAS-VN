@@ -11,19 +11,27 @@ from types_ import *
 
 def parse_args() -> Dict[str, Any]:
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', type=str, default='experiments/debugging/debugging.yaml')
-    parser.add_argument('--num_workers', type=int, default=32)
+    parser.add_argument('--cfg', '-C', type=str,
+                        default='experiments/debugging/debugging.yaml')
+    parser.add_argument('--num_workers', '-W', type=int, default=32)
+    parser.add_argument('--batch_size', '-B', type=int, default=32)
     args = parser.parse_args()
     
     with open(args.cfg, 'r') as f:
         cfg = yaml.safe_load(f)
         cfg['cfg'] = args.cfg
-        cfg['num_workers'] = args.num_workers
+        cfg['Data']['num_workers'] = args.num_workers
+        cfg['Data']['batch_size'] = args.batch_size
     
     return cfg
 
 
-def main(cfg):
+def main():
+    cfg = parse_args()
+    
+    print(cfg)
+    return
+    
     # Basic setttings
     rank = setup(cfg)
     
@@ -35,11 +43,11 @@ def main(cfg):
 
 
 if __name__ == '__main__':
-    cfg = parse_args()
-    main(cfg)
-    print('Done')
+    main()
     
     """
-    if debigging, python main.py
-    if training, torchrun --nnodes=1 --nproc_per_node=4 main.py
+    if debugging
+        python main.py
+    if training
+        torchrun --nnodes=1 --nproc_per_node=4 main.py --cfg path/to/yaml
     """

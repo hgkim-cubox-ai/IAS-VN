@@ -22,7 +22,7 @@
 # torchrun --nnodes=1 --nproc_per_node=1 main.py --cfg experiments/baseline/50/0.00005.yaml
 # torchrun --nnodes=1 --nproc_per_node=1 main.py --cfg experiments/baseline/50/0.00001.yaml
 # Use weights
-torchrun --nnodes=1 --nproc_per_node=1 main.py --cfg experiments/baseline/50/0.001_weights.yaml
+# torchrun --nnodes=1 --nproc_per_node=1 main.py --cfg experiments/baseline/50/0.001_weights.yaml
 
 # 101
 # torchrun --nnodes=1 --nproc_per_node=1 main.py --cfg experiments/baseline/101/0.005.yaml

@@ -23,29 +23,15 @@ def set_seed(seed: int = 777) -> None:
     os.environ['PYTHONHASHSEED'] = str(seed)
 
 
-def prepare_path(path: str) -> None:
-    """
-    Make directory if not exist.
-    Else, raise error.
-
-    Args:
-        path (str): path to directory
-    """
-    try:
-        os.mkdir(path)
-    except:
-        raise ValueError(f'Existing path!: {path}')
-
-
 def setup(cfg: Dict[str, Any]) -> int:
     """
-    Basic settings for training. (default to multi-gpu)
+    Basic settings. (default to single machine & multi-gpu)
 
     Args:
         cfg (Dict[str, Any]): config as dictionary.
 
     Returns:
-        int: rank in ddp or 0
+        int: rank if ddp or 0
     """
     if cfg['mode'] == 'debugging':
         rank = 0
@@ -58,7 +44,7 @@ def setup(cfg: Dict[str, Any]) -> int:
     
     if cfg['mode'] == 'train' and rank == 0:
         os.makedirs(cfg['save_path'], exist_ok=True)
-        shutil.copy(cfg['cfg'], os.path.join(cfg['save_path'],cfg['cfg'].split('/')[1]))
+        shutil.copy(cfg['cfg'], os.path.join(cfg['save_path'],cfg['cfg'].split('/')[-1]))
         wandb.init(
             project=cfg['wandb']['project'],
             group=cfg['wandb']['group'],

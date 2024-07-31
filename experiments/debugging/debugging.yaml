@@ -32,10 +32,6 @@ Data:
       144
     width:
       224
-  batch_size:
-    7
-  num_workers:
-    2
 
 # Architecture
 model:

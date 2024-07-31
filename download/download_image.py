@@ -195,8 +195,14 @@ def main():
         # 'TNGo_new4': {
         #     'fn': TNGo_new234, 'id': '1uDtPgXSPkFWcKP-X2OVLtbTSasL7wGNJ'
         # },
-        'Integration_Test': {
+        # 'Integration_Test': {
+        #     'fn': Integration_Test, 'id': '1XKA66_zuQ_S_LqoraliMyjHmzGNxWEWQ'
+        # }
+        'Integration_test_1': {
             'fn': Integration_Test, 'id': '1XKA66_zuQ_S_LqoraliMyjHmzGNxWEWQ'
+        },
+        'Integration_test_2': {
+            'fn': Integration_Test, 'id': '1Np0J2kCWWY0GaogEDS2k8Vxf9fDlyZdp'
         }
     }
     
