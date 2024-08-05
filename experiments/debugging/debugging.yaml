@@ -32,12 +32,14 @@ Data:
       144
     width:
       224
+  batch_size:
+    7
+  num_workers:
+    2
 
 # Architecture
 model:
   resnet_model
-lbp_in_model:
-  True
 backbone:
   resnet18
 regressor:
@@ -63,4 +65,3 @@ threshold:
   0.3
 
 pretrained_model:
-  # models/ResNet50_trained_on_korean_idcrad.pth

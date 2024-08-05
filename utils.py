@@ -13,7 +13,7 @@ from types_ import *
 
 def set_seed(seed: int = 777) -> None:
     """
-    Set the seed for reproducible result
+    Set seed for reproducibility
     """
     torch.manual_seed(seed)
     torch.backends.cudnn.benchmark = False
@@ -28,7 +28,7 @@ def setup(cfg: Dict[str, Any]) -> int:
     Basic settings. (default to single machine & multi-gpu)
 
     Args:
-        cfg (Dict[str, Any]): config as dictionary.
+        cfg (Dict[str, Any]): config as a dictionary.
 
     Returns:
         int: rank if ddp or 0
@@ -41,7 +41,7 @@ def setup(cfg: Dict[str, Any]) -> int:
         rank = dist.get_rank()
         seed = cfg['seed'] * dist.get_world_size() + rank
     set_seed(seed)
-    
+
     if cfg['mode'] == 'train' and rank == 0:
         os.makedirs(cfg['save_path'], exist_ok=True)
         shutil.copy(cfg['cfg'], os.path.join(cfg['save_path'],cfg['cfg'].split('/')[-1]))
